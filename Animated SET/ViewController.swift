@@ -106,17 +106,14 @@ class ViewController: UIViewController {
             
             specificCard.number = game.playingCards[index].number.rawValue
             
-            specificCard.cardDesign.color = game.playingCards[index].color.rawValue
-            specificCard.cardDesignCopy.color = game.playingCards[index].color.rawValue
-            specificCard.cardDesignCopy2.color = game.playingCards[index].color.rawValue
-            
-            specificCard.cardDesign.symbol = game.playingCards[index].symbol.rawValue
-            specificCard.cardDesignCopy.symbol = game.playingCards[index].symbol.rawValue
-            specificCard.cardDesignCopy2.symbol = game.playingCards[index].symbol.rawValue
-            
-            specificCard.cardDesign.shading = game.playingCards[index].shading.rawValue
-            specificCard.cardDesignCopy.shading = game.playingCards[index].shading.rawValue
-            specificCard.cardDesignCopy2.shading = game.playingCards[index].shading.rawValue
+            let cardDesignCopies = [specificCard.cardDesign, specificCard.cardDesignCopy, specificCard.cardDesignCopy2]
+
+            // for loop below assigns all the design copies with the appropriate properties from the model
+            for designCopies in cardDesignCopies {
+                designCopies.color = game.playingCards[index].color.rawValue
+                designCopies.symbol = game.playingCards[index].symbol.rawValue
+                designCopies.shading = game.playingCards[index].shading.rawValue
+            }
             
             if let cardGridCell = playingCardView.gridOfCards[index] {
                 let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
@@ -126,10 +123,12 @@ class ViewController: UIViewController {
                 specificCard.layer.borderWidth = 0.5
             }
             if game.selectedCards.contains(game.playingCards[index]) {
-                specificCard.backgroundColor = #colorLiteral(red: 0.9067332872, green: 0.9067332872, blue: 0.9067332872, alpha: 1)
+                specificCard.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+                specificCard.layer.borderWidth = 2.0
             }
             if game.matchedCards.contains(game.playingCards[index]) {
-                specificCard.backgroundColor = #colorLiteral(red: 0.785152839, green: 0.9719939011, blue: 0.9567258977, alpha: 1)
+                specificCard.layer.borderColor = #colorLiteral(red: 0.2588235438, green: 0.7568627596, blue: 0.9686274529, alpha: 1)
+                specificCard.layer.borderWidth = 2.0
             }
             groupOfCards.addSubview(specificCard)
         }
