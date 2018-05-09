@@ -14,11 +14,16 @@ class ViewController: UIViewController {
         super.viewDidLoad()
     }
     
+    override func viewDidLayoutSubviews() {
+        for index in game.playingCards.indices {
+            updateViewFromModel(for: index)
+        }
+    }
+    
     lazy var game = SetGame()
     
     func generateInitialDeck() {
         game.fullSourceDeck = CardDeck()
-        playingCardView.gridOfCards.frame = groupOfCards.bounds
         
         groupOfPlayingCardViews.removeAll()
         game.sourceDeck.removeAll()
@@ -41,7 +46,9 @@ class ViewController: UIViewController {
         
         for index in game.playingCards.indices {
             updateViewFromModel(for: index)
+            layoutAnimationDelayIncrement += 0.15
         }
+        layoutAnimationDelayIncrement = 0
     }
     
     var groupOfPlayingCardViews = [playingCardView]() {
@@ -82,8 +89,15 @@ class ViewController: UIViewController {
         }
         
         for index in game.playingCards.indices {
-            updateViewFromModel(for: index)
+            if index < game.playingCards.count - 3 {
+                updateViewFromModel(for: index)
+            } else {
+                layoutAnimationDelayIncrement += 0.8
+                updateViewFromModel(for: index)
+                layoutAnimationDelayIncrement -= 0.6
+            }
         }
+        layoutAnimationDelayIncrement = 0
     }
     
     @objc func selectCard(_ recognizer: UITapGestureRecognizer) {
@@ -188,6 +202,7 @@ class ViewController: UIViewController {
     var layoutAnimationDelayIncrement: Double = 0.0
     
     func updateViewFromModel(for index: Int) {
+        playingCardView.gridOfCards.frame = groupOfCards.bounds
         playingCardView.gridOfCards.cellCount = game.playingCards.count
 
         let specificCard = groupOfPlayingCardViews[index]
@@ -226,7 +241,7 @@ class ViewController: UIViewController {
                 delay: layoutAnimationDelayIncrement,
                 options: UIViewAnimationOptions.curveEaseInOut,
                 animations: { specificCard.frame =  cardFrame }
-                //                        completion: { subviews.frame = cardFrame }
+//                completion: { layoutAnimationDelayInc }
             )
         }
         
