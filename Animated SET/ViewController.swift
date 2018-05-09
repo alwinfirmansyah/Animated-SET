@@ -220,7 +220,7 @@ class ViewController: UIViewController {
                     )
                 }
             }
-            forLoopDelayCountInterval += 0.2
+            forLoopDelayCountInterval += 0.15
             let tap = UITapGestureRecognizer(target: self, action: #selector(selectCard(_:)))
             subviews.addGestureRecognizer(tap)
         }
