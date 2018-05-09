@@ -17,7 +17,7 @@ class SetGame {
     var selectedCards = [Card]()
     
     let defaultNumberOfCardsDealt = 12
-    let matchPoints = 11, penaltyPoints = -1
+    let matchPoints = 10, penaltyPoints = -15
     var matchCounter = 0, penaltyCounter = 0, totalScore = 0
     
     func generateInitialDeck() {
@@ -43,6 +43,7 @@ class SetGame {
     }
     
     func matchingSetLogic(for firstCard: Card, for secondCard: Card, for thirdCard: Card) {
+        penaltyCounter += 1
         let cardArray = [firstCard, secondCard, thirdCard]
         
         let numberSet: Set = [firstCard.number, secondCard.number, thirdCard.number]
@@ -58,6 +59,7 @@ class SetGame {
                             matchedCards.append(card)
                         }
                         matchCounter += 1
+                        penaltyCounter -= 1
                     }
                 }
             }
