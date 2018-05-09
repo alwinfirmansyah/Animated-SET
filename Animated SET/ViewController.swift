@@ -20,6 +20,7 @@ class ViewController: UIViewController {
         game.fullSourceDeck = CardDeck()
         playingCardView.gridOfCards.frame = groupOfCards.bounds
         
+        groupOfPlayingCardViews.removeAll()
         game.sourceDeck.removeAll()
         game.playingCards.removeAll()
         game.selectedCards.removeAll()
@@ -37,6 +38,10 @@ class ViewController: UIViewController {
                 groupOfPlayingCardViews.append(playingCardView())
             }
         }
+        
+        for index in game.playingCards.indices {
+            updateViewFromModel(for: index)
+        }
     }
     
     var groupOfPlayingCardViews = [playingCardView]() {
@@ -45,10 +50,6 @@ class ViewController: UIViewController {
             
             for view in groupOfPlayingCardViews {
                 groupOfCards.addSubview(view)
-            }
-            
-            for index in game.playingCards.indices {
-                updateViewFromModel(for: index)
             }
         }
     }
@@ -79,6 +80,10 @@ class ViewController: UIViewController {
                 }
             }
         }
+        
+        for index in game.playingCards.indices {
+            updateViewFromModel(for: index)
+        }
     }
     
     @objc func selectCard(_ recognizer: UITapGestureRecognizer) {
@@ -90,10 +95,7 @@ class ViewController: UIViewController {
                     }
                 }
             }
-            game.totalScore = (game.matchPoints * game.matchCounter) + (game.penaltyCounter * game.penaltyPoints)
-            scoreLabel.text = "Points: \(game.totalScore)"
         }
-        
         for index in game.playingCards.indices {
             updateViewFromModel(for: index)
         }
@@ -147,7 +149,7 @@ class ViewController: UIViewController {
         resetCardView()
         generateInitialDeck()
         selectedCardCount = 0
-        scoreLabel.text = "Points: \(game.totalScore)"
+        layoutAnimationDelayIncrement = 0
     }
     
     @IBOutlet weak var scoreLabel: UILabel! {

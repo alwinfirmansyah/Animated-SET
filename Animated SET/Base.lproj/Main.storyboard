@@ -18,14 +18,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="751" text="Score: 0" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vPp-8d-1x4">
-                                <rect key="frame" x="295" y="28" width="64" height="20.5"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <view opaque="NO" contentMode="redraw" translatesAutoresizingMaskIntoConstraints="NO" id="Owx-qS-rZc">
-                                <rect key="frame" x="16" y="56.5" width="343" height="556.5"/>
+                                <rect key="frame" x="16" y="28" width="343" height="585"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" priority="750" constant="800" id="PeT-2z-yZw"/>
@@ -60,23 +54,19 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="vPp-8d-1x4" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" symbolic="YES" id="5Qb-26-JRI"/>
-                            <constraint firstItem="Owx-qS-rZc" firstAttribute="top" secondItem="vPp-8d-1x4" secondAttribute="bottom" constant="8" symbolic="YES" id="6mP-sN-M8m"/>
                             <constraint firstItem="OmV-Oo-Teo" firstAttribute="top" secondItem="Owx-qS-rZc" secondAttribute="bottom" constant="8" symbolic="YES" id="Fvy-aO-dzM"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="OmV-Oo-Teo" secondAttribute="bottom" constant="16" id="Gp5-n1-Q6a"/>
                             <constraint firstItem="Owx-qS-rZc" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="JcL-7f-gcU"/>
+                            <constraint firstItem="Owx-qS-rZc" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="8" id="MQh-co-WJK"/>
                             <constraint firstItem="OmV-Oo-Teo" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="QtN-UK-50M"/>
-                            <constraint firstItem="vPp-8d-1x4" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="8" id="ewc-6c-SS8"/>
                             <constraint firstItem="Owx-qS-rZc" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="gIb-C9-tH7"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="OmV-Oo-Teo" secondAttribute="trailing" constant="16" id="tuE-aO-exe"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="vPp-8d-1x4" secondAttribute="trailing" constant="16" id="ucA-iK-trP"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Owx-qS-rZc" secondAttribute="trailing" constant="16" id="uyY-f0-ejJ"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
                         <outlet property="groupOfCards" destination="Owx-qS-rZc" id="kFW-TG-duW"/>
-                        <outlet property="scoreLabel" destination="vPp-8d-1x4" id="DaV-Ff-JZt"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
