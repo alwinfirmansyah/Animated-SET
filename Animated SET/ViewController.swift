@@ -49,12 +49,15 @@ class ViewController: UIViewController {
         updateViewFromModel()
     }
     
-    @objc func selectCard(_ sender: UITapGestureRecognizer) {
+    @objc func selectCard(_ recognizer: UITapGestureRecognizer) {
         if game.playingCards.count > 0 {
-            if let tappedView = sender.view {
-                print("this works")
+            if let tappedView = recognizer.view {
                 if let cardIndex = groupOfCards.subviews.index(of: tappedView){
-                    cardSelectionLogic(at: cardIndex)
+                    if !game.matchedCards.contains(game.playingCards[cardIndex]) {
+                        cardSelectionLogic(at: cardIndex)
+                    } else {
+                        replaceMatchingCards()
+                    }
                 }
             }
             updateViewFromModel()
@@ -80,17 +83,17 @@ class ViewController: UIViewController {
         }
         
         if selectedCardCount == 3 {
-            for selectedCard in game.selectedCards {
-                game.matchedCards.append(selectedCard)
-            }
-            //            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
+//            for selectedCard in game.selectedCards {
+//                game.matchedCards.append(selectedCard)
+//            }
+            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
         }
         
         if selectedCardCount > 3 {
-            replaceMatchingCards()
             selectedCardCount = 1
             game.selectedCards.removeAll()
             game.selectedCards.append(game.playingCards[index])
+            replaceMatchingCards()
         }
     }
     
@@ -136,6 +139,8 @@ class ViewController: UIViewController {
                     game.playingCards.remove(at: indexOfMatchedCardInPlayingCards)
                     game.playingCards.insert(newCard, at: indexOfMatchedCardInPlayingCards)
                     game.sourceDeck.removeFirst()
+                } else {
+                    game.playingCards.remove(at: indexOfMatchedCardInPlayingCards)
                 }
             }
         }
