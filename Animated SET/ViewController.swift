@@ -20,9 +20,30 @@ class ViewController: UIViewController {
     
     lazy var game = SetGame()
     
+    func generateInitialDeck() {
+        game.fullSourceDeck = CardDeck()
+        
+        game.sourceDeck.removeAll()
+        game.playingCards.removeAll()
+        game.matchedCards.removeAll()
+        game.selectedCards.removeAll()
+        
+        game.totalScore = 0
+        game.matchCounter = 0
+        game.penaltyCounter = 0
+        
+        game.sourceDeck = game.fullSourceDeck.shuffleDeck()
+        
+        for index in 0..<game.defaultNumberOfCardsDealt {
+            if let shuffledDeckIndex = game.sourceDeck.index(of: game.sourceDeck[index]){
+                game.playingCards.append(game.sourceDeck.remove(at: shuffledDeckIndex))
+            }
+        }
+    }
+    
     @IBOutlet weak var groupOfCards: UIView! {
         didSet {
-            game.generateInitialDeck()
+            generateInitialDeck()
             updateViewFromModel()
             
             let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(swipeDownForMoreCards))
@@ -111,7 +132,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func newGame(_ sender: UIButton) {
-        game.generateInitialDeck()
+        generateInitialDeck()
         resetCardView()
         updateViewFromModel()
         selectedCardCount = 0

@@ -20,28 +20,6 @@ class SetGame {
     let matchPoints = 10, penaltyPoints = -15
     var matchCounter = 0, penaltyCounter = 0, totalScore = 0
     
-    func generateInitialDeck() {
-        fullSourceDeck = CardDeck()
-        
-        sourceDeck.removeAll()
-        playingCards.removeAll()
-        matchedCards.removeAll()
-        selectedCards.removeAll()
-        
-        totalScore = 0
-        matchCounter = 0
-        penaltyCounter = 0
-        
-        sourceDeck = fullSourceDeck.shuffleDeck()
-        
-        for index in 0..<defaultNumberOfCardsDealt {
-            if let shuffledDeckIndex = sourceDeck.index(of: sourceDeck[index]){
-                playingCards.append(sourceDeck.remove(at: shuffledDeckIndex))
-            }
-        }
-        
-    }
-    
     func matchingSetLogic(for firstCard: Card, for secondCard: Card, for thirdCard: Card) {
         penaltyCounter += 1
         let cardArray = [firstCard, secondCard, thirdCard]
