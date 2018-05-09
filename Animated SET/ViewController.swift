@@ -19,11 +19,10 @@ class ViewController: UIViewController {
     }
     
     lazy var game = SetGame()
-
+    
     @IBOutlet weak var groupOfCards: UIView! {
         didSet {
             game.generateInitialDeck()
-            
             updateViewFromModel()
             
             let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(swipeDownForMoreCards))
@@ -37,14 +36,13 @@ class ViewController: UIViewController {
     }
     
     @objc func swipeDownForMoreCards() {
-        let newCards = game.shuffledDeck.filter { !game.playingCards.contains($0) && !game.matchedCards.contains($0) }
+        let newCards = game.sourceDeck.filter { !game.playingCards.contains($0) && !game.matchedCards.contains($0) }
         
         if newCards.count > 0 {
             for index in 0...2 {
-                game.dealtCards.append(newCards[index])
                 game.playingCards.append(newCards[index])
-                if let shuffledDeckIndex = game.shuffledDeck.index(of: newCards[index]){
-                    game.shuffledDeck.remove(at: shuffledDeckIndex)
+                if let shuffledDeckIndex = game.sourceDeck.index(of: newCards[index]){
+                    game.sourceDeck.remove(at: shuffledDeckIndex)
                 }
             }
         }
@@ -56,7 +54,7 @@ class ViewController: UIViewController {
             if let tappedView = sender.view {
                 print("this works")
                 if let cardIndex = groupOfCards.subviews.index(of: tappedView){
-                    game.selectCards(at: cardIndex)
+                    cardSelectionLogic(at: cardIndex)
                 }
             }
             updateViewFromModel()
@@ -65,10 +63,41 @@ class ViewController: UIViewController {
         }
     }
     
+    var selectedCardCount = 0
+
+    func cardSelectionLogic(at index: Int) {
+        selectedCardCount += 1
+        
+        if game.selectedCards.count < 3 {
+            if game.selectedCards.contains(game.playingCards[index]) {
+                if let indexInSelectedCards = game.selectedCards.index(of: game.playingCards[index]){
+                    game.selectedCards.remove(at: indexInSelectedCards)
+                    selectedCardCount -= 2
+                }
+            } else {
+                game.selectedCards.append(game.playingCards[index])
+            }
+        }
+        
+        if selectedCardCount == 3 {
+            for selectedCard in game.selectedCards {
+                game.matchedCards.append(selectedCard)
+            }
+            //            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
+        }
+        
+        if selectedCardCount > 3 {
+            replaceMatchingCards()
+            selectedCardCount = 1
+            game.selectedCards.removeAll()
+            game.selectedCards.append(game.playingCards[index])
+        }
+    }
+    
     @objc func shuffleCard(_ sender: UIRotationGestureRecognizer) {
         switch sender.state {
         case .ended:
-            game.shuffleCards()
+            game.shufflePlayingCards()
             updateViewFromModel()
         default: break
         }
@@ -82,6 +111,7 @@ class ViewController: UIViewController {
         game.generateInitialDeck()
         resetCardView()
         updateViewFromModel()
+        selectedCardCount = 0
         scoreLabel.text = "Points: \(game.totalScore)"
     }
     
@@ -95,19 +125,34 @@ class ViewController: UIViewController {
         }
     }
     
+    func replaceMatchingCards() {
+        for card in game.matchedCards {
+            if let indexOfMatchedCardInShuffledDeck = game.sourceDeck.index(of: card) {
+                game.sourceDeck.remove(at: indexOfMatchedCardInShuffledDeck)
+            }
+            
+            if let indexOfMatchedCardInPlayingCards = game.playingCards.index(of: card) {
+                if let newCard = game.sourceDeck.first {
+                    game.playingCards.remove(at: indexOfMatchedCardInPlayingCards)
+                    game.playingCards.insert(newCard, at: indexOfMatchedCardInPlayingCards)
+                    game.sourceDeck.removeFirst()
+                }
+            }
+        }
+    }
+    
     func updateViewFromModel() {
         resetCardView()
         
-        playingCardView.gridOfCards.frame = groupOfCards.bounds
-        playingCardView.gridOfCards.cellCount = game.playingCards.count
-        
         for index in game.playingCards.indices {
             let specificCard = playingCardView()
+            groupOfCards.addSubview(specificCard)
             
+            // .number represents the number of symbols per card
             specificCard.number = game.playingCards[index].number.rawValue
             
             let cardDesignCopies = [specificCard.cardDesign, specificCard.cardDesignCopy, specificCard.cardDesignCopy2]
-
+            
             // for loop below assigns all the design copies with the appropriate properties from the model
             for designCopies in cardDesignCopies {
                 designCopies.color = game.playingCards[index].color.rawValue
@@ -115,13 +160,10 @@ class ViewController: UIViewController {
                 designCopies.shading = game.playingCards[index].shading.rawValue
             }
             
-            if let cardGridCell = playingCardView.gridOfCards[index] {
-                let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
-                specificCard.frame = cardFrame
-                specificCard.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-                specificCard.layer.borderColor = #colorLiteral(red: 0.9060194547, green: 0.9060194547, blue: 0.9060194547, alpha: 1)
-                specificCard.layer.borderWidth = 0.5
-            }
+            specificCard.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+            specificCard.layer.borderColor = #colorLiteral(red: 0.9060194547, green: 0.9060194547, blue: 0.9060194547, alpha: 1)
+            specificCard.layer.borderWidth = 0.5
+            
             if game.selectedCards.contains(game.playingCards[index]) {
                 specificCard.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
                 specificCard.layer.borderWidth = 2.0
@@ -130,10 +172,18 @@ class ViewController: UIViewController {
                 specificCard.layer.borderColor = #colorLiteral(red: 0.2588235438, green: 0.7568627596, blue: 0.9686274529, alpha: 1)
                 specificCard.layer.borderWidth = 2.0
             }
-            groupOfCards.addSubview(specificCard)
         }
         
+        playingCardView.gridOfCards.frame = groupOfCards.bounds
+        playingCardView.gridOfCards.cellCount = groupOfCards.subviews.count
+        
         for subviews in groupOfCards.subviews {
+            if let indexOfSubview = groupOfCards.subviews.index(of: subviews) {
+                if let cardGridCell = playingCardView.gridOfCards[indexOfSubview] {
+                    let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
+                    subviews.frame = cardFrame
+                }
+            }
             let tap = UITapGestureRecognizer(target: self, action: #selector(selectCard(_:)))
             subviews.addGestureRecognizer(tap)
         }
