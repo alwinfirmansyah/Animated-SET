@@ -13,6 +13,7 @@ class SetGame {
     
     var sourceDeck = [Card]()
     var playingCards = [Card]()
+    var selectedCards = [Card]()
     var matchedCards = [Card]()
     
     let defaultNumberOfCardsDealt = 12
