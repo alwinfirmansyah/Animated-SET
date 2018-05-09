@@ -15,7 +15,7 @@ class playingCardView: UIView {
     var cardDesignCopy = cardDesignView() { didSet { setNeedsDisplay(); setNeedsLayout() } }
     var cardDesignCopy2 = cardDesignView() { didSet { setNeedsDisplay(); setNeedsLayout() } }
     
-    static var gridOfCards = Grid(layout: Grid.Layout.aspectRatio(0.8))
+    static var gridOfCards = Grid(layout: Grid.Layout.aspectRatio(1.8))
     
     func generateCardDesignWithMultiplier() {
         cardDesign.backgroundColor = UIColor.clear

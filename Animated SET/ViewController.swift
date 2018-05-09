@@ -203,13 +203,24 @@ class ViewController: UIViewController {
         playingCardView.gridOfCards.frame = groupOfCards.bounds
         playingCardView.gridOfCards.cellCount = groupOfCards.subviews.count
         
+        var forLoopDelayCountInterval: Double = 0.0
+        
         for subviews in groupOfCards.subviews {
             if let indexOfSubview = groupOfCards.subviews.index(of: subviews) {
                 if let cardGridCell = playingCardView.gridOfCards[indexOfSubview] {
                     let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
-                    subviews.frame = cardFrame
+                    // need to add placeholder frame for each subview (bounds of the deck of cards)
+                        
+                    UIViewPropertyAnimator.runningPropertyAnimator(
+                        withDuration: 0.6,
+                        delay: forLoopDelayCountInterval,
+                        options: UIViewAnimationOptions.curveEaseInOut,
+                        animations: { subviews.frame =  cardFrame }
+//                        completion: { subviews.frame = cardFrame }
+                    )
                 }
             }
+            forLoopDelayCountInterval += 0.2
             let tap = UITapGestureRecognizer(target: self, action: #selector(selectCard(_:)))
             subviews.addGestureRecognizer(tap)
         }
