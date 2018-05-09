@@ -68,13 +68,14 @@ class ViewController: UIViewController {
         if newCards.count > 0 {
             for index in 0...2 {
                 game.playingCards.append(newCards[index])
-                if let recentlyAddedCardIndex = game.playingCards.index(of: newCards[index]) {
-                    updateViewFromModel(for: recentlyAddedCardIndex)
-                }
+                groupOfPlayingCardViews.append(playingCardView())
                 if let shuffledDeckIndex = game.sourceDeck.index(of: newCards[index]){
                     game.sourceDeck.remove(at: shuffledDeckIndex)
                 }
             }
+        }
+        for index in game.playingCards.indices {
+            updateViewFromModel(for: index)
         }
     }
     
@@ -93,6 +94,10 @@ class ViewController: UIViewController {
             }
             game.totalScore = (game.matchPoints * game.matchCounter) + (game.penaltyCounter * game.penaltyPoints)
             scoreLabel.text = "Points: \(game.totalScore)"
+        }
+        
+        for index in game.playingCards.indices {
+            updateViewFromModel(for: index)
         }
     }
     
