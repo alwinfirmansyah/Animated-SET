@@ -14,7 +14,6 @@ class SetGame {
     var sourceDeck = [Card]()
     var playingCards = [Card]()
     var matchedCards = [Card]()
-    var selectedCards = [Card]()
     
     let defaultNumberOfCardsDealt = 12
     let matchPoints = 10, penaltyPoints = -15
