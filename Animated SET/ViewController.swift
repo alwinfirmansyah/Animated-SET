@@ -45,10 +45,12 @@ class ViewController: UIViewController {
         }
         
         for index in game.playingCards.indices {
+            dealCardsAnimationDelayIncrement += 0.2
+            cardTransparencyDelayIncrement += 0.2
             updateViewFromModel(for: index)
-            layoutAnimationDelayIncrement += 0.15
         }
-        layoutAnimationDelayIncrement = 0
+        dealCardsAnimationDelayIncrement = 0
+        cardTransparencyDelayIncrement = 0
     }
     
     var groupOfPlayingCardViews = [playingCardView]() {
@@ -89,15 +91,17 @@ class ViewController: UIViewController {
         }
         
         for index in game.playingCards.indices {
-            if index < game.playingCards.count - 3 {
-                updateViewFromModel(for: index)
-            } else {
-                layoutAnimationDelayIncrement += 0.8
-                updateViewFromModel(for: index)
-                layoutAnimationDelayIncrement -= 0.6
+            if index == game.playingCards.count - 3 {
+                dealCardsAnimationDelayIncrement += 0.5
+                cardTransparencyDelayIncrement += 0.5
+            } else if index > game.playingCards.count - 3 {
+                dealCardsAnimationDelayIncrement += 0.2
+                cardTransparencyDelayIncrement += 0.2
             }
+            updateViewFromModel(for: index)
         }
-        layoutAnimationDelayIncrement = 0
+        dealCardsAnimationDelayIncrement = 0
+        cardTransparencyDelayIncrement = 0
     }
     
     @objc func selectCard(_ recognizer: UITapGestureRecognizer) {
@@ -163,7 +167,8 @@ class ViewController: UIViewController {
         resetCardView()
         generateInitialDeck()
         selectedCardCount = 0
-        layoutAnimationDelayIncrement = 0
+        cardTransparencyDelayIncrement = 0
+        // need to add other delay increments
     }
     
     @IBOutlet weak var scoreLabel: UILabel! {
@@ -199,7 +204,9 @@ class ViewController: UIViewController {
         }
     }
     
-    var layoutAnimationDelayIncrement: Double = 0.0
+    var dealCardsAnimationDelayIncrement: Double = 0.0
+    var cardTransparencyDelayIncrement: Double = 0.0
+    var matchingAnimationDelayIncrement: Double = 0.0
     
     func updateViewFromModel(for index: Int) {
         playingCardView.gridOfCards.frame = groupOfCards.bounds
@@ -222,6 +229,7 @@ class ViewController: UIViewController {
         specificCard.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
         specificCard.layer.borderColor = #colorLiteral(red: 0.9060194547, green: 0.9060194547, blue: 0.9060194547, alpha: 1)
         specificCard.layer.borderWidth = 0.5
+        specificCard.alpha = 0
         
         if game.selectedCards.contains(game.playingCards[index]) {
             specificCard.layer.borderColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
@@ -230,7 +238,22 @@ class ViewController: UIViewController {
         if game.matchedCards.contains(game.playingCards[index]) {
             specificCard.layer.borderColor = #colorLiteral(red: 0.2588235438, green: 0.7568627596, blue: 0.9686274529, alpha: 1)
             specificCard.layer.borderWidth = 2.0
+            UIViewPropertyAnimator.runningPropertyAnimator(
+                withDuration: 0.5,
+                delay: matchingAnimationDelayIncrement,
+                options: UIViewAnimationOptions.curveEaseInOut,
+                animations: { specificCard.alpha = 0 },
+                completion: { finsihed in }
+            )
         }
+        
+        UIViewPropertyAnimator.runningPropertyAnimator(
+            withDuration: 0.0,
+            delay: cardTransparencyDelayIncrement,
+            options: UIViewAnimationOptions.beginFromCurrentState,
+            animations: { specificCard.alpha = 1 },
+            completion: { finsihed in }
+        )
         
         if let cardGridCell = playingCardView.gridOfCards[index] {
             let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
@@ -238,7 +261,7 @@ class ViewController: UIViewController {
             
             UIViewPropertyAnimator.runningPropertyAnimator(
                 withDuration: 0.6,
-                delay: layoutAnimationDelayIncrement,
+                delay: dealCardsAnimationDelayIncrement,
                 options: UIViewAnimationOptions.curveEaseInOut,
                 animations: { specificCard.frame =  cardFrame }
 //                completion: { layoutAnimationDelayInc }
