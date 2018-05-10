@@ -56,10 +56,12 @@ class ViewController: UIViewController {
     var groupOfPlayingCardViews = [playingCardView]() {
         didSet {
             resetCardView()
-            
+
             for view in groupOfPlayingCardViews {
                 groupOfCards.addSubview(view)
             }
+            
+            groupOfCards.layoutIfNeeded()
         }
     }
     
@@ -111,7 +113,7 @@ class ViewController: UIViewController {
                 if let cardIndex = groupOfPlayingCardViews.index(of: tappedView){
                     if !game.matchedCards.contains(game.playingCards[cardIndex]) {
                         cardSelectionLogic(at: cardIndex)
-                        updateViewFromModel(for: cardIndex)
+//                        updateViewFromModel(for: cardIndex)
                     }
                 }
             }
@@ -133,6 +135,7 @@ class ViewController: UIViewController {
             } else {
                 game.selectedCards.append(game.playingCards[index])
             }
+            updateViewFromModel(for: index)
         }
         
         if selectedCardCount == 3 {
@@ -161,7 +164,6 @@ class ViewController: UIViewController {
                 updateViewFromModel(for: index)
             }
             arrayOfCurrentSelectedCardIndices.removeAll()
-            
             replaceMatchingCards()
         }
     }
@@ -217,6 +219,11 @@ class ViewController: UIViewController {
                 }
             }
         }
+        
+        for index in game.playingCards.indices {
+            updateViewFromModel(for: index)
+        }
+        
     }
     
     var dealCardsAnimationDelayIncrement: Double = 0.0
@@ -224,7 +231,11 @@ class ViewController: UIViewController {
     var matchingAnimationDelayIncrement: Double = 0.0
     
     func updateViewFromModel(for index: Int) {
-
+//        resetCardView()
+//        for view in groupOfPlayingCardViews {
+//            groupOfCards.addSubview(view)
+//        }
+        
         playingCardView.gridOfCards.frame = groupOfCards.bounds
         playingCardView.gridOfCards.cellCount = game.playingCards.count
 
@@ -270,7 +281,6 @@ class ViewController: UIViewController {
             animations: { specificCard.alpha = 1 },
             completion: { finsihed in }
         )
-        
         
         if let cardGridCell = playingCardView.gridOfCards[index] {
             let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
