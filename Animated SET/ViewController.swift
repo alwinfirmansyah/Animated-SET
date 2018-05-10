@@ -96,7 +96,7 @@ class ViewController: UIViewController {
         for index in game.playingCards.indices {
             if index == game.playingCards.count - 3 {
                 dealCardsAnimationDelayIncrement += 0.5
-                cardTransparencyDelayIncrement += 0.5
+//                cardTransparencyDelayIncrement += 0.5
             } else if index > game.playingCards.count - 3 {
                 dealCardsAnimationDelayIncrement += 0.2
                 cardTransparencyDelayIncrement += 0.2
@@ -249,15 +249,12 @@ class ViewController: UIViewController {
     var matchingAnimationDelayIncrement: Double = 0.0
     
     func updateViewFromModel(for index: Int) {
-//        resetCardView()
-//        for view in groupOfPlayingCardViews {
-//            groupOfCards.addSubview(view)
-//        }
-        
-        playingCardView.gridOfCards.frame = groupOfCards.bounds
+     
+        playingCardView.gridOfCards.frame = groupOfCards.bounds.applying(CGAffineTransform(scaleX: 1.0, y: 0.9))
         playingCardView.gridOfCards.cellCount = game.playingCards.count
 
         let specificCard = groupOfPlayingCardViews[index]
+//        specificCard.frame = CGRect(x: self.groupOfCards.bounds.minX, y: self.groupOfCards.bounds.maxY, width: self.groupOfCards.bounds.width / 4, height: self.groupOfCards.bounds.height / 4)
         
         // .number represents the number of symbols per card
         specificCard.number = game.playingCards[index].number.rawValue
@@ -274,7 +271,6 @@ class ViewController: UIViewController {
         specificCard.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
         specificCard.layer.borderColor = #colorLiteral(red: 0.9060194547, green: 0.9060194547, blue: 0.9060194547, alpha: 1)
         specificCard.layer.borderWidth = 0.5
-        specificCard.alpha = 0
         
         UIViewPropertyAnimator.runningPropertyAnimator(
             withDuration: 0.0,
@@ -308,13 +304,19 @@ class ViewController: UIViewController {
                 withDuration: 0.6,
                 delay: dealCardsAnimationDelayIncrement,
                 options: UIViewAnimationOptions.curveEaseInOut,
-                animations: { specificCard.frame =  cardFrame }
-//                completion: { layoutAnimationDelayInc }
+                animations: { specificCard.frame =  cardFrame },
+                completion: { finished in  }
             )
         }
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(selectCard(_:)))
         specificCard.addGestureRecognizer(tap)
+    }
+}
+
+extension ViewController {
+    private struct layoutConstants {
+        static let playingCardsBottomOffset: CGFloat = 16.0
     }
 }
 
