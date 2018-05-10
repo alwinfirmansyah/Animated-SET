@@ -90,6 +90,7 @@ class ViewController: UIViewController {
             }
         }
         
+        // adjusts animation delays for appropriate flow of layout / dealing cards
         for index in game.playingCards.indices {
             if index == game.playingCards.count - 3 {
                 dealCardsAnimationDelayIncrement += 0.5
@@ -110,16 +111,15 @@ class ViewController: UIViewController {
                 if let cardIndex = groupOfPlayingCardViews.index(of: tappedView){
                     if !game.matchedCards.contains(game.playingCards[cardIndex]) {
                         cardSelectionLogic(at: cardIndex)
+                        updateViewFromModel(for: cardIndex)
                     }
                 }
             }
         }
-        for index in game.playingCards.indices {
-            updateViewFromModel(for: index)
-        }
     }
     
     var selectedCardCount = 0
+    var arrayOfCurrentSelectedCardIndices = [Int]()
 
     func cardSelectionLogic(at index: Int) {
         selectedCardCount += 1
@@ -139,13 +139,29 @@ class ViewController: UIViewController {
             for card in game.selectedCards {
                 game.matchedCards.append(card)
             }
-//            game.matchingSetLogic(for: game.playingCards[selectedCardIndices[0]], for: game.playingCards[selectedCardIndices[1]], for: game.playingCards[selectedCardIndices[2]])
+//            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
+            for card in game.matchedCards {
+                if let indexInPlayingCards = game.playingCards.index(of: card) {
+                    updateViewFromModel(for: indexInPlayingCards)
+                }
+            }
         }
         
         if selectedCardCount > 3 {
             selectedCardCount = 1
+            for card in game.selectedCards {
+                if let indexInPlayingCards = game.playingCards.index(of: card) {
+                    arrayOfCurrentSelectedCardIndices.append(indexInPlayingCards)
+                }
+            }
             game.selectedCards.removeAll()
             game.selectedCards.append(game.playingCards[index])
+            
+            for index in arrayOfCurrentSelectedCardIndices {
+                updateViewFromModel(for: index)
+            }
+            arrayOfCurrentSelectedCardIndices.removeAll()
+            
             replaceMatchingCards()
         }
     }
@@ -191,11 +207,10 @@ class ViewController: UIViewController {
                 if let newCard = game.sourceDeck.first {
                     game.playingCards.remove(at: indexOfMatchedCardInPlayingCards)
                     groupOfPlayingCardViews.remove(at: indexOfMatchedCardInPlayingCards)
-                    
                     game.playingCards.insert(newCard, at: indexOfMatchedCardInPlayingCards)
                     groupOfPlayingCardViews.insert(playingCardView(), at: indexOfMatchedCardInPlayingCards)
-                    
                     game.sourceDeck.removeFirst()
+                    updateViewFromModel(for: indexOfMatchedCardInPlayingCards)
                 } else {
                     game.playingCards.remove(at: indexOfMatchedCardInPlayingCards)
                     groupOfPlayingCardViews.remove(at: indexOfMatchedCardInPlayingCards)
@@ -209,6 +224,7 @@ class ViewController: UIViewController {
     var matchingAnimationDelayIncrement: Double = 0.0
     
     func updateViewFromModel(for index: Int) {
+
         playingCardView.gridOfCards.frame = groupOfCards.bounds
         playingCardView.gridOfCards.cellCount = game.playingCards.count
 
@@ -238,13 +254,13 @@ class ViewController: UIViewController {
         if game.matchedCards.contains(game.playingCards[index]) {
             specificCard.layer.borderColor = #colorLiteral(red: 0.2588235438, green: 0.7568627596, blue: 0.9686274529, alpha: 1)
             specificCard.layer.borderWidth = 2.0
-            UIViewPropertyAnimator.runningPropertyAnimator(
-                withDuration: 0.5,
-                delay: matchingAnimationDelayIncrement,
-                options: UIViewAnimationOptions.curveEaseInOut,
-                animations: { specificCard.alpha = 0 },
-                completion: { finsihed in }
-            )
+//            UIViewPropertyAnimator.runningPropertyAnimator(
+//                withDuration: 0.5,
+//                delay: matchingAnimationDelayIncrement,
+//                options: UIViewAnimationOptions.curveEaseInOut,
+//                animations: { specificCard.alpha = 0 },
+//                completion: { finsihed in }
+//            )
         }
         
         UIViewPropertyAnimator.runningPropertyAnimator(
@@ -254,6 +270,7 @@ class ViewController: UIViewController {
             animations: { specificCard.alpha = 1 },
             completion: { finsihed in }
         )
+        
         
         if let cardGridCell = playingCardView.gridOfCards[index] {
             let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
