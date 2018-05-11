@@ -41,6 +41,8 @@ class ViewController: UIViewController {
             if let shuffledDeckIndex = game.sourceDeck.index(of: game.sourceDeck[index]){
                 game.playingCards.append(game.sourceDeck.remove(at: shuffledDeckIndex))
                 groupOfPlayingCardViews.append(playingCardView())
+                groupOfPlayingCardViews[index].frame = cardFrameBeforeBeingAdded
+                groupOfPlayingCardViews[index].alpha = 0
             }
         }
         
@@ -59,6 +61,8 @@ class ViewController: UIViewController {
 
             for view in groupOfPlayingCardViews {
                 groupOfCards.addSubview(view)
+//                view.frame = CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/4, height: groupOfCards.bounds.width/6)
+//                view.alpha = 0
             }
             
             groupOfCards.layoutIfNeeded()
@@ -86,6 +90,8 @@ class ViewController: UIViewController {
             for index in 0...2 {
                 game.playingCards.append(newCards[index])
                 groupOfPlayingCardViews.append(playingCardView())
+                groupOfPlayingCardViews.last?.frame = cardFrameBeforeBeingAdded
+                groupOfPlayingCardViews.last?.alpha = 0
                 if let shuffledDeckIndex = game.sourceDeck.index(of: newCards[index]){
                     game.sourceDeck.remove(at: shuffledDeckIndex)
                 }
@@ -95,14 +101,18 @@ class ViewController: UIViewController {
         // adjusts animation delays for appropriate flow of layout / dealing cards
         for index in game.playingCards.indices {
             if index == game.playingCards.count - 3 {
-                dealCardsAnimationDelayIncrement += 0.5
-//                cardTransparencyDelayIncrement += 0.5
+                dealCardsAnimationDelayIncrement += 0.6
+                cardTransparencyDelayIncrement += 0.6
             } else if index > game.playingCards.count - 3 {
-                dealCardsAnimationDelayIncrement += 0.2
-                cardTransparencyDelayIncrement += 0.2
+                dealCardsAnimationDelayIncrement  = 0.4 * animationCounterMultiplier
+                cardTransparencyDelayIncrement  = 0.4 * animationCounterMultiplier
+                animationCounterMultiplier += 1.0
+//                dealCardsAnimationDelayIncrement += 0.3
+//                cardTransparencyDelayIncrement += 0.3
             }
             updateViewFromModel(for: index)
         }
+        animationCounterMultiplier = 1.0
         dealCardsAnimationDelayIncrement = 0
         cardTransparencyDelayIncrement = 0
     }
@@ -201,9 +211,6 @@ class ViewController: UIViewController {
         }
     }
     
-    var recentlyReplacedMatchedIndices = [Int]()
-    var animationCounterMultiplier: Double = 1.0
-    
     func replaceMatchingCards() {
         for card in game.matchedCards {
             if let indexOfMatchedCardInShuffledDeck = game.sourceDeck.index(of: card) {
@@ -216,6 +223,8 @@ class ViewController: UIViewController {
                     groupOfPlayingCardViews.remove(at: indexOfMatchedCardInPlayingCards)
                     game.playingCards.insert(newCard, at: indexOfMatchedCardInPlayingCards)
                     groupOfPlayingCardViews.insert(playingCardView(), at: indexOfMatchedCardInPlayingCards)
+                    groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards].frame = cardFrameBeforeBeingAdded
+                    groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards].alpha = 0
                     game.sourceDeck.removeFirst()
                     recentlyReplacedMatchedIndices.append(indexOfMatchedCardInPlayingCards)
                 } else {
@@ -244,13 +253,17 @@ class ViewController: UIViewController {
         animationCounterMultiplier = 1
     }
     
+    var recentlyReplacedMatchedIndices = [Int]()
+
+    // animation adjustments for different situations
+    var animationCounterMultiplier: Double = 1.0
     var dealCardsAnimationDelayIncrement: Double = 0.0
     var cardTransparencyDelayIncrement: Double = 0.0
     var matchingAnimationDelayIncrement: Double = 0.0
     
     func updateViewFromModel(for index: Int) {
      
-        playingCardView.gridOfCards.frame = groupOfCards.bounds.applying(CGAffineTransform(scaleX: 1.0, y: 0.9))
+        playingCardView.gridOfCards.frame = groupOfCards.bounds.applying(CGAffineTransform(scaleX: 1.0, y: 0.8).translatedBy(x: 0, y: 80.0))
         playingCardView.gridOfCards.cellCount = game.playingCards.count
 
         let specificCard = groupOfPlayingCardViews[index]
@@ -273,7 +286,7 @@ class ViewController: UIViewController {
         specificCard.layer.borderWidth = 0.5
         
         UIViewPropertyAnimator.runningPropertyAnimator(
-            withDuration: 0.0,
+            withDuration: 0.2,
             delay: cardTransparencyDelayIncrement,
             options: UIViewAnimationOptions.beginFromCurrentState,
             animations: { specificCard.alpha = 1 },
@@ -285,8 +298,8 @@ class ViewController: UIViewController {
             specificCard.layer.borderWidth = 2.0
         }
         if game.matchedCards.contains(game.playingCards[index]) {
-            specificCard.layer.borderColor = #colorLiteral(red: 0.2588235438, green: 0.7568627596, blue: 0.9686274529, alpha: 1)
-            specificCard.layer.borderWidth = 2.0
+//            specificCard.layer.borderColor = #colorLiteral(red: 0.2588235438, green: 0.7568627596, blue: 0.9686274529, alpha: 1)
+//            specificCard.layer.borderWidth = 2.0
             UIViewPropertyAnimator.runningPropertyAnimator(
                 withDuration: 0.5,
                 delay: matchingAnimationDelayIncrement,
@@ -301,9 +314,9 @@ class ViewController: UIViewController {
             // need to add placeholder frame for each subview (bounds of the deck of cards)
             
             UIViewPropertyAnimator.runningPropertyAnimator(
-                withDuration: 0.6,
+                withDuration: 0.5,
                 delay: dealCardsAnimationDelayIncrement,
-                options: UIViewAnimationOptions.curveEaseInOut,
+                options: UIViewAnimationOptions.curveEaseIn,
                 animations: { specificCard.frame =  cardFrame },
                 completion: { finished in  }
             )
@@ -315,8 +328,11 @@ class ViewController: UIViewController {
 }
 
 extension ViewController {
-    private struct layoutConstants {
-        static let playingCardsBottomOffset: CGFloat = 16.0
+
+    private var cardFrameBeforeBeingAdded: CGRect {
+        return CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/4, height: groupOfCards.bounds.width/6)
     }
+    
+    
 }
 
