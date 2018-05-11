@@ -67,6 +67,7 @@
                     </view>
                     <connections>
                         <outlet property="groupOfCards" destination="Owx-qS-rZc" id="kFW-TG-duW"/>
+                        <outlet property="setCountLabel" destination="neM-ff-Wdv" id="IMJ-zF-NSm"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

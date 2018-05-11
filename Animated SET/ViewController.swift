@@ -42,6 +42,7 @@ class ViewController: UIViewController {
                 game.playingCards.append(game.sourceDeck.remove(at: shuffledDeckIndex))
                 groupOfPlayingCardViews.append(playingCardView())
                 groupOfPlayingCardViews[index].frame = cardFrameBeforeBeingAdded
+                groupOfPlayingCardViews[index].backgroundColor = DesignConstants.cardBackgroundColor
                 groupOfPlayingCardViews[index].alpha = 0
             }
         }
@@ -61,8 +62,6 @@ class ViewController: UIViewController {
 
             for view in groupOfPlayingCardViews {
                 groupOfCards.addSubview(view)
-//                view.frame = CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/4, height: groupOfCards.bounds.width/6)
-//                view.alpha = 0
             }
             
             groupOfCards.layoutIfNeeded()
@@ -91,6 +90,7 @@ class ViewController: UIViewController {
                 game.playingCards.append(newCards[index])
                 groupOfPlayingCardViews.append(playingCardView())
                 groupOfPlayingCardViews.last?.frame = cardFrameBeforeBeingAdded
+                groupOfPlayingCardViews.last?.backgroundColor = DesignConstants.cardBackgroundColor
                 groupOfPlayingCardViews.last?.alpha = 0
                 if let shuffledDeckIndex = game.sourceDeck.index(of: newCards[index]){
                     game.sourceDeck.remove(at: shuffledDeckIndex)
@@ -123,11 +123,11 @@ class ViewController: UIViewController {
                 if let cardIndex = groupOfPlayingCardViews.index(of: tappedView){
                     if !game.matchedCards.contains(game.playingCards[cardIndex]) {
                         cardSelectionLogic(at: cardIndex)
-//                        updateViewFromModel(for: cardIndex)
                     }
                 }
             }
         }
+        setCountLabel.text = "SETS: \(game.matchCounter)"
     }
     
     var selectedCardCount = 0
@@ -152,6 +152,8 @@ class ViewController: UIViewController {
             for card in game.selectedCards {
                 game.matchedCards.append(card)
             }
+            game.matchCounter += 1
+            
 //            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
             for card in game.matchedCards {
                 if let indexInPlayingCards = game.playingCards.index(of: card) {
@@ -201,8 +203,8 @@ class ViewController: UIViewController {
         // need to add other delay increments
     }
     
-    @IBOutlet weak var scoreLabel: UILabel! {
-        didSet { scoreLabel.text = "Points: \(game.totalScore)" }
+    @IBOutlet weak var setCountLabel: UILabel! {
+        didSet { setCountLabel.text = "SETS: \(game.matchCounter)" }
     }
     
     func resetCardView() {
@@ -224,6 +226,7 @@ class ViewController: UIViewController {
                     game.playingCards.insert(newCard, at: indexOfMatchedCardInPlayingCards)
                     groupOfPlayingCardViews.insert(playingCardView(), at: indexOfMatchedCardInPlayingCards)
                     groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards].frame = cardFrameBeforeBeingAdded
+                    groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards].backgroundColor = DesignConstants.cardBackgroundColor
                     groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards].alpha = 0
                     game.sourceDeck.removeFirst()
                     recentlyReplacedMatchedIndices.append(indexOfMatchedCardInPlayingCards)
@@ -263,11 +266,10 @@ class ViewController: UIViewController {
     
     func updateViewFromModel(for index: Int) {
      
-        playingCardView.gridOfCards.frame = groupOfCards.bounds.applying(CGAffineTransform(scaleX: 1.0, y: 0.8).translatedBy(x: 0, y: 80.0))
+        playingCardView.gridOfCards.frame = groupOfCards.bounds
         playingCardView.gridOfCards.cellCount = game.playingCards.count
-
+        
         let specificCard = groupOfPlayingCardViews[index]
-//        specificCard.frame = CGRect(x: self.groupOfCards.bounds.minX, y: self.groupOfCards.bounds.maxY, width: self.groupOfCards.bounds.width / 4, height: self.groupOfCards.bounds.height / 4)
         
         // .number represents the number of symbols per card
         specificCard.number = game.playingCards[index].number.rawValue
@@ -281,16 +283,26 @@ class ViewController: UIViewController {
             designCopies.shading = game.playingCards[index].shading.rawValue
         }
         
-        specificCard.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-        specificCard.layer.borderColor = #colorLiteral(red: 0.9060194547, green: 0.9060194547, blue: 0.9060194547, alpha: 1)
-        specificCard.layer.borderWidth = 0.5
+//        specificCard.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+//        specificCard.layer.borderColor = #colorLiteral(red: 0.9060194547, green: 0.9060194547, blue: 0.9060194547, alpha: 1)
+//        specificCard.layer.borderWidth = 0.5
+
         
         UIViewPropertyAnimator.runningPropertyAnimator(
-            withDuration: 0.2,
+            withDuration: 0.3,
             delay: cardTransparencyDelayIncrement,
             options: UIViewAnimationOptions.beginFromCurrentState,
             animations: { specificCard.alpha = 1 },
-            completion: { finsihed in }
+            completion: { finsihed in
+                if specificCard.isFaceUp {
+                    UIView.transition(with: specificCard,
+                                      duration: 5.0,
+                                      options: [.transitionFlipFromLeft],
+                                      animations: { specificCard.isFaceUp = !specificCard.isFaceUp },
+                                      completion: { finished in }
+                    )
+                }
+        }
         )
         
         if game.selectedCards.contains(game.playingCards[index]) {
@@ -311,7 +323,6 @@ class ViewController: UIViewController {
         
         if let cardGridCell = playingCardView.gridOfCards[index] {
             let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
-            // need to add placeholder frame for each subview (bounds of the deck of cards)
             
             UIViewPropertyAnimator.runningPropertyAnimator(
                 withDuration: 0.5,
@@ -328,9 +339,12 @@ class ViewController: UIViewController {
 }
 
 extension ViewController {
-
+    private struct DesignConstants {
+        static let cardBackgroundColor: UIColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
+    }
+    
     private var cardFrameBeforeBeingAdded: CGRect {
-        return CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/4, height: groupOfCards.bounds.width/6)
+        return CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/4, height: groupOfCards.bounds.height/10)
     }
     
     

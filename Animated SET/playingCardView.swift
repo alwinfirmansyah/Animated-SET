@@ -15,12 +15,17 @@ class playingCardView: UIView {
     var cardDesignCopy = cardDesignView() { didSet { setNeedsDisplay(); setNeedsLayout() } }
     var cardDesignCopy2 = cardDesignView() { didSet { setNeedsDisplay(); setNeedsLayout() } }
     
+    var isFaceUp: Bool = true { didSet { setNeedsDisplay (); setNeedsLayout() } }
+    
     static var gridOfCards = Grid(layout: Grid.Layout.aspectRatio(1.8))
     
     func generateCardDesignWithMultiplier() {
         cardDesign.backgroundColor = UIColor.clear
         cardDesignCopy.backgroundColor = UIColor.clear
         cardDesignCopy2.backgroundColor = UIColor.clear
+        
+        backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+        layer.borderColor = #colorLiteral(red: 0.9060194547, green: 0.9060194547, blue: 0.9060194547, alpha: 1)
         
         switch number {
         case 1:
@@ -43,7 +48,22 @@ class playingCardView: UIView {
     }
     
     override func draw(_ rect: CGRect) {
-        generateCardDesignWithMultiplier()
+        if isFaceUp {
+            generateCardDesignWithMultiplier()
+        } else {
+            backgroundColor = #colorLiteral(red: 0.1411764771, green: 0.3960784376, blue: 0.5647059083, alpha: 1)
+            layer.borderColor = #colorLiteral(red: 0.1411764771, green: 0.3960784376, blue: 0.5647059083, alpha: 1)
+        }
+        layer.borderWidth = 0.5
+
+//        if isFaceUp == true {
+//            backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+//            layer.borderColor = #colorLiteral(red: 0.9060194547, green: 0.9060194547, blue: 0.9060194547, alpha: 1)
+//        } else {
+//            backgroundColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+//            layer.borderColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+//        }
+//        layer.borderWidth = 0.5
     }
 }
 
