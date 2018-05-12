@@ -23,6 +23,8 @@ class ViewController: UIViewController {
     
     lazy var game = SetGame()
     
+    lazy var animator = UIDynamicAnimator(referenceView: groupOfCards)
+    
     func generateInitialDeck() {
         game.fullSourceDeck = CardDeck()
         
@@ -131,10 +133,6 @@ class ViewController: UIViewController {
         recentlyReplacedMatchedIndices.removeAll()
         animationCounterMultiplier = 1.0
         
-//        for _ in game.playingCards.indices {
-//            cardDealingAnimationDelays.append(0.0)
-//        }
-//        updateViewFromModel()
         setCountLabel.text = "SETS: \(game.matchCounter)"
     }
     
@@ -156,14 +154,12 @@ class ViewController: UIViewController {
         }
         
         if selectedCardCount == 3 {
-            for card in game.selectedCards {
-                game.matchedCards.append(card)
-            }
-            game.matchCounter += 1
+//            for card in game.selectedCards {
+//                game.matchedCards.append(card)
+//            }
+//            game.matchCounter += 1
             
-//            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
-//            replaceMatchingCards()
-
+            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
         }
         
         if selectedCardCount > 3 {
@@ -230,19 +226,6 @@ class ViewController: UIViewController {
                 }
             }
         }
-        // used for animation adjustments
-//        for index in game.playingCards.indices {
-//            cardDealingAnimationDelays.append(0.0)
-//            for matchIndex in recentlyReplacedMatchedIndices {
-//                if index == matchIndex {
-//                    cardDealingAnimationDelays[index] += 0.3 * animationCounterMultiplier
-//                    animationCounterMultiplier += 1.0
-//                }
-//            }
-//        }
-//        updateViewFromModel()
-//        recentlyReplacedMatchedIndices.removeAll()
-//        animationCounterMultiplier = 1.0
     }
     
     var cardDealingAnimationDelays = [Double]()
@@ -326,14 +309,6 @@ class ViewController: UIViewController {
                         }
                 }
                 )
-                
-//                UIViewPropertyAnimator.runningPropertyAnimator(
-//                    withDuration: 0.5,
-//                    delay: dealCardsAnimationDelayIncrement,
-//                    options: UIViewAnimationOptions.curveEaseIn,
-//                    animations: { specificCard.frame =  cardFrame },
-//                    completion: { finished in  }
-//                )
             }
             
             let tap = UITapGestureRecognizer(target: self, action: #selector(selectCard(_:)))
