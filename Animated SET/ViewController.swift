@@ -15,9 +15,15 @@ class ViewController: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
-//        for index in game.playingCards.indices {
-//            updateViewFromModel(for: index)
-//        }
+        for index in game.playingCards.indices {
+            cardDealingAnimationDelays.append(0.0)
+//            if index > 0 {
+//                cardDealingAnimationDelays.append(Double(index)/10)
+//            } else {
+//                cardDealingAnimationDelays.append(Double(index))
+//            }
+        }
+        updateViewFromModel()
     }
     
     lazy var game = SetGame()
@@ -45,8 +51,13 @@ class ViewController: UIViewController {
                 groupOfPlayingCardViews[index].backgroundColor = DesignConstants.faceDownCardBackgroundColor
                 groupOfPlayingCardViews[index].alpha = 0
             }
+            
+            if index > 0 {
+                cardDealingAnimationDelays.append(Double(index)/10)
+            } else {
+                cardDealingAnimationDelays.append(Double(index))
+            }
         }
-        
         updateViewFromModel()
     }
     
@@ -91,26 +102,15 @@ class ViewController: UIViewController {
                 }
             }
         }
-        
+        for index in game.playingCards.indices {
+            cardDealingAnimationDelays.append(0)
+            if index == game.playingCards.count - 3 {
+                cardDealingAnimationDelays[index] = 0.6
+            } else if index > game.playingCards.count - 3 {
+                cardDealingAnimationDelays[index] = cardDealingAnimationDelays[index-1] + 0.4
+            }
+        }
         updateViewFromModel()
-        
-        // adjusts animation delays for appropriate flow of layout / dealing cards
-//        for index in game.playingCards.indices {
-//            if index == game.playingCards.count - 3 {
-//                dealCardsAnimationDelayIncrement += 0.6
-//                cardTransparencyDelayIncrement += 0.6
-//            } else if index > game.playingCards.count - 3 {
-//                dealCardsAnimationDelayIncrement  = 0.4 * animationCounterMultiplier
-//                cardTransparencyDelayIncrement  = 0.4 * animationCounterMultiplier
-//                animationCounterMultiplier += 1.0
-////                dealCardsAnimationDelayIncrement += 0.3
-////                cardTransparencyDelayIncrement += 0.3
-//            }
-//            updateViewFromModel(for: index)
-//        }
-//        animationCounterMultiplier = 1.0
-//        dealCardsAnimationDelayIncrement = 0
-//        cardTransparencyDelayIncrement = 0
     }
     
     @objc func selectCard(_ recognizer: UITapGestureRecognizer) {
@@ -122,6 +122,9 @@ class ViewController: UIViewController {
                     }
                 }
             }
+        }
+        for _ in game.playingCards.indices {
+            cardDealingAnimationDelays.append(0.0)
         }
         updateViewFromModel()
         setCountLabel.text = "SETS: \(game.matchCounter)"
@@ -235,6 +238,7 @@ class ViewController: UIViewController {
 //        animationCounterMultiplier = 1
     }
     
+    var cardDealingAnimationDelays = [Double]()
     var recentlyReplacedMatchedIndices = [Int]()
 
     // animation adjustments for different situations
@@ -250,14 +254,14 @@ class ViewController: UIViewController {
         
         for index in game.playingCards.indices {
             
-            if index == game.playingCards.count - 3 {
-                dealCardsAnimationDelayIncrement = 0.8
-                cardTransparencyDelayIncrement = 0.8
-            } else if index > game.playingCards.count - 3 {
-                dealCardsAnimationDelayIncrement  += 0.4
-                cardTransparencyDelayIncrement  += 0.4
-//                animationCounterMultiplier += 1.0
-            }
+//            if index == game.playingCards.count - 3 {
+//                dealCardsAnimationDelayIncrement = 0.8
+//                cardTransparencyDelayIncrement = 0.8
+//            } else if index > game.playingCards.count - 3 {
+//                dealCardsAnimationDelayIncrement  += 0.4
+//                cardTransparencyDelayIncrement  += 0.4
+////                animationCounterMultiplier += 1.0
+//            }
             
             let specificCard = groupOfPlayingCardViews[index]
 
@@ -302,11 +306,19 @@ class ViewController: UIViewController {
                 
                 UIViewPropertyAnimator.runningPropertyAnimator(
                     withDuration: 0.5,
-                    delay: dealCardsAnimationDelayIncrement,
+                    delay: cardDealingAnimationDelays[index],
                     options: UIViewAnimationOptions.curveEaseIn,
                     animations: { specificCard.frame =  cardFrame },
                     completion: { finished in  }
                 )
+                
+//                UIViewPropertyAnimator.runningPropertyAnimator(
+//                    withDuration: 0.5,
+//                    delay: dealCardsAnimationDelayIncrement,
+//                    options: UIViewAnimationOptions.curveEaseIn,
+//                    animations: { specificCard.frame =  cardFrame },
+//                    completion: { finished in  }
+//                )
             }
             
             let tap = UITapGestureRecognizer(target: self, action: #selector(selectCard(_:)))
@@ -315,6 +327,7 @@ class ViewController: UIViewController {
         animationCounterMultiplier = 1.0
         dealCardsAnimationDelayIncrement = 0
         cardTransparencyDelayIncrement = 0
+        cardDealingAnimationDelays.removeAll()
     }
 }
 
@@ -332,7 +345,7 @@ extension ViewController {
     }
     
     private var cardFrameBeforeBeingAdded: CGRect {
-        return CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/4, height: groupOfCards.bounds.height/10)
+        return CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/3, height: groupOfCards.bounds.height/9)
     }
     
     

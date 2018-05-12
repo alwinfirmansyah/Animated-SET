@@ -15,37 +15,41 @@ class playingCardView: UIView {
     var cardDesignCopy = cardDesignView() { didSet { setNeedsDisplay(); setNeedsLayout() } }
     var cardDesignCopy2 = cardDesignView() { didSet { setNeedsDisplay(); setNeedsLayout() } }
     
-//    var isFaceUp: Bool = true { didSet { setNeedsDisplay (); setNeedsLayout() } }
+    var isFaceUp: Bool = false { didSet { setNeedsDisplay (); setNeedsLayout() } }
     
     static var gridOfCards = Grid(layout: Grid.Layout.aspectRatio(1.8))
     
     func generateCardDesignWithMultiplier() {
-        cardDesign.backgroundColor = UIColor.clear
-        cardDesignCopy.backgroundColor = UIColor.clear
-        cardDesignCopy2.backgroundColor = UIColor.clear
-        
-        switch number {
-        case 1:
-            cardDesign.frame = middleRect
-            addSubview(cardDesign)
-        case 2:
-            cardDesign.frame = leftHalfRect
-            cardDesignCopy.frame = rightHalfRect
-            addSubview(cardDesign)
-            addSubview(cardDesignCopy)
-        case 3:
-            cardDesign.frame = leftThirdRect
-            cardDesignCopy.frame = middleRect
-            cardDesignCopy2.frame = rightThirdRect
-            addSubview(cardDesign)
-            addSubview(cardDesignCopy)
-            addSubview(cardDesignCopy2)
-        default: print("no number mentioned")
-        }
+        if isFaceUp {
+            
+            cardDesign.backgroundColor = UIColor.clear
+            cardDesignCopy.backgroundColor = UIColor.clear
+            cardDesignCopy2.backgroundColor = UIColor.clear
+            
+            switch number {
+            case 1:
+                cardDesign.frame = middleRect
+                addSubview(cardDesign)
+            case 2:
+                cardDesign.frame = leftHalfRect
+                cardDesignCopy.frame = rightHalfRect
+                addSubview(cardDesign)
+                addSubview(cardDesignCopy)
+            case 3:
+                cardDesign.frame = leftThirdRect
+                cardDesignCopy.frame = middleRect
+                cardDesignCopy2.frame = rightThirdRect
+                addSubview(cardDesign)
+                addSubview(cardDesignCopy)
+                addSubview(cardDesignCopy2)
+            default: print("no number mentioned")
+            }
+        } 
     }
     
     override func draw(_ rect: CGRect) {
         generateCardDesignWithMultiplier()
+        
 //
 //        if isFaceUp {
 //            generateCardDesignWithMultiplier()
