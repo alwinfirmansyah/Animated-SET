@@ -15,13 +15,8 @@ class ViewController: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
-        for index in game.playingCards.indices {
+        for _ in game.playingCards.indices {
             cardDealingAnimationDelays.append(0.0)
-//            if index > 0 {
-//                cardDealingAnimationDelays.append(Double(index)/10)
-//            } else {
-//                cardDealingAnimationDelays.append(Double(index))
-//            }
         }
         updateViewFromModel()
     }
@@ -123,10 +118,23 @@ class ViewController: UIViewController {
                 }
             }
         }
-        for _ in game.playingCards.indices {
+        for index in game.playingCards.indices {
             cardDealingAnimationDelays.append(0.0)
+            for matchIndex in recentlyReplacedMatchedIndices {
+                if index == matchIndex {
+                    cardDealingAnimationDelays[index] += 0.3 * animationCounterMultiplier
+                    animationCounterMultiplier += 1.0
+                }
+            }
         }
         updateViewFromModel()
+        recentlyReplacedMatchedIndices.removeAll()
+        animationCounterMultiplier = 1.0
+        
+//        for _ in game.playingCards.indices {
+//            cardDealingAnimationDelays.append(0.0)
+//        }
+//        updateViewFromModel()
         setCountLabel.text = "SETS: \(game.matchCounter)"
     }
     
@@ -154,6 +162,8 @@ class ViewController: UIViewController {
             game.matchCounter += 1
             
 //            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
+//            replaceMatchingCards()
+
         }
         
         if selectedCardCount > 3 {
@@ -222,20 +232,17 @@ class ViewController: UIViewController {
         }
         // used for animation adjustments
 //        for index in game.playingCards.indices {
-//            dealCardsAnimationDelayIncrement = 0.0
-//            cardTransparencyDelayIncrement = 0.0
-//
+//            cardDealingAnimationDelays.append(0.0)
 //            for matchIndex in recentlyReplacedMatchedIndices {
 //                if index == matchIndex {
-//                    dealCardsAnimationDelayIncrement += 0.3 * animationCounterMultiplier
-//                    cardTransparencyDelayIncrement += 0.3 * animationCounterMultiplier
+//                    cardDealingAnimationDelays[index] += 0.3 * animationCounterMultiplier
 //                    animationCounterMultiplier += 1.0
 //                }
 //            }
-//            updateViewFromModel(for: index)
 //        }
+//        updateViewFromModel()
 //        recentlyReplacedMatchedIndices.removeAll()
-//        animationCounterMultiplier = 1
+//        animationCounterMultiplier = 1.0
     }
     
     var cardDealingAnimationDelays = [Double]()
@@ -254,17 +261,8 @@ class ViewController: UIViewController {
         
         for index in game.playingCards.indices {
             
-//            if index == game.playingCards.count - 3 {
-//                dealCardsAnimationDelayIncrement = 0.8
-//                cardTransparencyDelayIncrement = 0.8
-//            } else if index > game.playingCards.count - 3 {
-//                dealCardsAnimationDelayIncrement  += 0.4
-//                cardTransparencyDelayIncrement  += 0.4
-////                animationCounterMultiplier += 1.0
-//            }
-            
             let specificCard = groupOfPlayingCardViews[index]
-
+            
             // .number represents the number of symbols per card
             specificCard.number = game.playingCards[index].number.rawValue
             
@@ -288,7 +286,12 @@ class ViewController: UIViewController {
             if game.selectedCards.contains(game.playingCards[index]) {
                 specificCard.layer.borderColor = DesignConstants.selectedCardBorderColor
                 specificCard.layer.borderWidth = DesignConstants.selectedCardBorderWidth
+            } else {
+                specificCard.layer.borderColor = DesignConstants.faceUpCardBorderColor
+                specificCard.layer.borderWidth = DesignConstants.faceUpCardBorderWidth
             }
+            
+            
             if game.matchedCards.contains(game.playingCards[index]) {
                 //            specificCard.layer.borderColor = #colorLiteral(red: 0.2588235438, green: 0.7568627596, blue: 0.9686274529, alpha: 1)
                 //            specificCard.layer.borderWidth = 2.0
@@ -309,7 +312,19 @@ class ViewController: UIViewController {
                     delay: cardDealingAnimationDelays[index],
                     options: UIViewAnimationOptions.curveEaseIn,
                     animations: { specificCard.frame =  cardFrame },
-                    completion: { finished in  }
+                    completion: { finished in
+                        if !specificCard.isFaceUp {
+                            specificCard.backgroundColor = DesignConstants.faceUpCardBackgroundColor
+                            specificCard.layer.borderColor = DesignConstants.faceUpCardBorderColor
+                            specificCard.layer.borderWidth = DesignConstants.faceUpCardBorderWidth
+                            
+                            UIView.transition(with: specificCard,
+                                              duration: 1.0,
+                                              options: .transitionFlipFromLeft,
+                                              animations: { specificCard.isFaceUp = !specificCard.isFaceUp }
+                            )
+                        }
+                }
                 )
                 
 //                UIViewPropertyAnimator.runningPropertyAnimator(
@@ -333,7 +348,7 @@ class ViewController: UIViewController {
 
 extension ViewController {
     private struct DesignConstants {
-        static let faceDownCardBackgroundColor: UIColor = #colorLiteral(red: 0.1411764771, green: 0.3960784376, blue: 0.5647059083, alpha: 1)
+        static let faceDownCardBackgroundColor: UIColor = #colorLiteral(red: 0.911333541, green: 0.911333541, blue: 0.911333541, alpha: 1)
         static let faceUpCardBackgroundColor: UIColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
         static let faceUpCardBorderColor: CGColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
         
@@ -345,7 +360,7 @@ extension ViewController {
     }
     
     private var cardFrameBeforeBeingAdded: CGRect {
-        return CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/3, height: groupOfCards.bounds.height/9)
+        return CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/3, height: 50.0)
     }
     
     

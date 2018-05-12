@@ -25,7 +25,7 @@ class playingCardView: UIView {
             cardDesign.backgroundColor = UIColor.clear
             cardDesignCopy.backgroundColor = UIColor.clear
             cardDesignCopy2.backgroundColor = UIColor.clear
-            
+                        
             switch number {
             case 1:
                 cardDesign.frame = middleRect
@@ -49,7 +49,6 @@ class playingCardView: UIView {
     
     override func draw(_ rect: CGRect) {
         generateCardDesignWithMultiplier()
-        
 //
 //        if isFaceUp {
 //            generateCardDesignWithMultiplier()
