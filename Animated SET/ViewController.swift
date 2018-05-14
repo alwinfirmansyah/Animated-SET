@@ -15,15 +15,26 @@ class ViewController: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
-        for _ in game.playingCards.indices {
-            cardDealingAnimationDelays.append(0.0)
-        }
-        updateViewFromModel()
+//        for index in game.playingCards.indices {
+//            cardDealingAnimationDelays.append(0)
+//            if index > 0 {
+//                cardDealingAnimationDelays[index] = cardDealingAnimationDelays[index-1] + 0.4
+//            }
+//        }
+//        updateViewFromModel()
     }
     
     lazy var game = SetGame()
     
     lazy var animator = UIDynamicAnimator(referenceView: groupOfCards)
+    lazy var cardBehavior = CardBehavior(in: animator)
+    
+    lazy var collisionBehavior: UICollisionBehavior = {
+        let behavior = UICollisionBehavior()
+        behavior.translatesReferenceBoundsIntoBoundary = true
+        animator.addBehavior(behavior)
+        return behavior
+    }()
     
     func generateInitialDeck() {
         game.fullSourceDeck = CardDeck()
@@ -48,11 +59,9 @@ class ViewController: UIViewController {
                 groupOfPlayingCardViews[index].backgroundColor = DesignConstants.faceDownCardBackgroundColor
                 groupOfPlayingCardViews[index].alpha = 0
             }
-            
+            cardDealingAnimationDelays.append(0)
             if index > 0 {
-                cardDealingAnimationDelays.append(Double(index)/10)
-            } else {
-                cardDealingAnimationDelays.append(Double(index))
+                cardDealingAnimationDelays[index] = cardDealingAnimationDelays[index-1] + 0.3
             }
         }
         updateViewFromModel()
@@ -65,8 +74,6 @@ class ViewController: UIViewController {
             for view in groupOfPlayingCardViews {
                 groupOfCards.addSubview(view)
             }
-            
-            groupOfCards.layoutIfNeeded()
         }
     }
     
@@ -104,7 +111,7 @@ class ViewController: UIViewController {
             if index == game.playingCards.count - 3 {
                 cardDealingAnimationDelays[index] = 0.6
             } else if index > game.playingCards.count - 3 {
-                cardDealingAnimationDelays[index] = cardDealingAnimationDelays[index-1] + 0.4
+                cardDealingAnimationDelays[index] = cardDealingAnimationDelays[index-1] + 0.3
             }
         }
         updateViewFromModel()
@@ -130,8 +137,7 @@ class ViewController: UIViewController {
             }
         }
         updateViewFromModel()
-        recentlyReplacedMatchedIndices.removeAll()
-        animationCounterMultiplier = 1.0
+//        recentlyReplacedMatchedIndices.removeAll()
         
         setCountLabel.text = "SETS: \(game.matchCounter)"
     }
@@ -154,12 +160,13 @@ class ViewController: UIViewController {
         }
         
         if selectedCardCount == 3 {
-//            for card in game.selectedCards {
-//                game.matchedCards.append(card)
-//            }
-//            game.matchCounter += 1
+            for card in game.selectedCards {
+                game.matchedCards.append(card)
+            }
+            game.matchCounter += 1
             
-            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
+//            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
+//            replaceMatchingCards()
         }
         
         if selectedCardCount > 3 {
@@ -189,8 +196,9 @@ class ViewController: UIViewController {
         resetCardView()
         generateInitialDeck()
         selectedCardCount = 0
-        cardTransparencyDelayIncrement = 0
         // need to add other delay increments
+        
+        setCountLabel.text = "SETS: \(game.matchCounter)"
     }
     
     @IBOutlet weak var setCountLabel: UILabel! {
@@ -211,6 +219,7 @@ class ViewController: UIViewController {
             
             if let indexOfMatchedCardInPlayingCards = game.playingCards.index(of: card) {
                 if let newCard = game.sourceDeck.first {
+                    recentlyReplacedMatchedCardViews.append(groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards])
                     game.playingCards.remove(at: indexOfMatchedCardInPlayingCards)
                     groupOfPlayingCardViews.remove(at: indexOfMatchedCardInPlayingCards)
                     game.playingCards.insert(newCard, at: indexOfMatchedCardInPlayingCards)
@@ -228,14 +237,13 @@ class ViewController: UIViewController {
         }
     }
     
+    var recentlyReplacedMatchedCardViews = [playingCardView]()
+    
+    // animation adjustments for different situations
     var cardDealingAnimationDelays = [Double]()
     var recentlyReplacedMatchedIndices = [Int]()
-
-    // animation adjustments for different situations
     var animationCounterMultiplier: Double = 1.0
-    var dealCardsAnimationDelayIncrement: Double = 0.0
-    var cardTransparencyDelayIncrement: Double = 0.0
-    var matchingAnimationDelayIncrement: Double = 0.0
+    var matchingReturnDelayIncrement: Double = 0.0
     
     func updateViewFromModel() {
      
@@ -249,10 +257,10 @@ class ViewController: UIViewController {
             // .number represents the number of symbols per card
             specificCard.number = game.playingCards[index].number.rawValue
             
-            let cardDesignCopies = [specificCard.cardDesign, specificCard.cardDesignCopy, specificCard.cardDesignCopy2]
+            let copyOfMatchedCardDesigns = [specificCard.cardDesign, specificCard.cardDesignCopy, specificCard.cardDesignCopy2]
             
             // for loop below assigns all the design copies with the appropriate properties from the model
-            for designCopies in cardDesignCopies {
+            for designCopies in copyOfMatchedCardDesigns {
                 designCopies.color = game.playingCards[index].color.rawValue
                 designCopies.symbol = game.playingCards[index].symbol.rawValue
                 designCopies.shading = game.playingCards[index].shading.rawValue
@@ -260,32 +268,10 @@ class ViewController: UIViewController {
             
             UIViewPropertyAnimator.runningPropertyAnimator(
                 withDuration: 0.3,
-                delay: cardTransparencyDelayIncrement,
+                delay: 0.1,
                 options: UIViewAnimationOptions.beginFromCurrentState,
-                animations: { specificCard.alpha = 1 },
-                completion: { finished in }
+                animations: { specificCard.alpha = 1 }
             )
-            
-            if game.selectedCards.contains(game.playingCards[index]) {
-                specificCard.layer.borderColor = DesignConstants.selectedCardBorderColor
-                specificCard.layer.borderWidth = DesignConstants.selectedCardBorderWidth
-            } else {
-                specificCard.layer.borderColor = DesignConstants.faceUpCardBorderColor
-                specificCard.layer.borderWidth = DesignConstants.faceUpCardBorderWidth
-            }
-            
-            
-            if game.matchedCards.contains(game.playingCards[index]) {
-                //            specificCard.layer.borderColor = #colorLiteral(red: 0.2588235438, green: 0.7568627596, blue: 0.9686274529, alpha: 1)
-                //            specificCard.layer.borderWidth = 2.0
-                UIViewPropertyAnimator.runningPropertyAnimator(
-                    withDuration: 0.5,
-                    delay: matchingAnimationDelayIncrement,
-                    options: UIViewAnimationOptions.curveEaseInOut,
-                    animations: { specificCard.alpha = 0 },
-                    completion: { finsihed in }
-                )
-            }
             
             if let cardGridCell = playingCardView.gridOfCards[index] {
                 let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
@@ -311,13 +297,87 @@ class ViewController: UIViewController {
                 )
             }
             
+            if game.selectedCards.contains(game.playingCards[index]) {
+                specificCard.layer.borderColor = DesignConstants.selectedCardBorderColor
+                specificCard.layer.borderWidth = DesignConstants.selectedCardBorderWidth
+            } else {
+                specificCard.layer.borderColor = DesignConstants.faceUpCardBorderColor
+                specificCard.layer.borderWidth = DesignConstants.faceUpCardBorderWidth
+            }
+            
+            if game.matchedCards.contains(game.playingCards[index]) {
+                let copyOfMatchedCard = playingCardView()
+                copyOfMatchedCard.rotate360Degrees()
+                copyOfMatchedCard.number = game.playingCards[index].number.rawValue
+                let copyOfMatchedCardDesigns = [copyOfMatchedCard.cardDesign, copyOfMatchedCard.cardDesignCopy, copyOfMatchedCard.cardDesignCopy2]
+                for designCopies in copyOfMatchedCardDesigns {
+                    designCopies.color = game.playingCards[index].color.rawValue
+                    designCopies.symbol = game.playingCards[index].symbol.rawValue
+                    designCopies.shading = game.playingCards[index].shading.rawValue
+                }
+                copyOfMatchedCard.isFaceUp = !copyOfMatchedCard.isFaceUp
+                copyOfMatchedCard.backgroundColor = DesignConstants.faceUpCardBackgroundColor
+                copyOfMatchedCard.layer.borderColor = DesignConstants.faceUpCardBorderColor
+                copyOfMatchedCard.layer.borderWidth = DesignConstants.faceUpCardBorderWidth
+                copyOfMatchedCard.frame = specificCard.frame
+            
+                recentlyReplacedMatchedCardViews.append(copyOfMatchedCard)
+                
+                UIViewPropertyAnimator.runningPropertyAnimator(
+                    withDuration: 0.1,
+                    delay: 0.0,
+                    options: UIViewAnimationOptions.curveEaseInOut,
+                    animations: { specificCard.alpha = 0 },
+                    completion: { finsihed in }
+                )
+            }
+            
             let tap = UITapGestureRecognizer(target: self, action: #selector(selectCard(_:)))
             specificCard.addGestureRecognizer(tap)
         }
+        for view in recentlyReplacedMatchedCardViews {
+            groupOfCards.addSubview(view)
+            cardBehavior.addItem(view)
+            view.layer.zPosition = 1
+            UIViewPropertyAnimator.runningPropertyAnimator(
+                withDuration: 0.2,
+                delay: 0.5,
+                options: UIViewAnimationOptions.beginFromCurrentState,
+                animations: { view.backgroundColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1) },
+                completion: { finished in
+                    UIView.transition(with: view,
+                                      duration: 0.6,
+                                      options: .transitionFlipFromRight,
+                                      animations: { view.isFaceUp = !view.isFaceUp },
+                                      completion: { finished in
+                                        self.cardBehavior.removeItem(view)
+                                        UIViewPropertyAnimator.runningPropertyAnimator(
+                                            withDuration: 1.0,
+                                            delay: self.matchingReturnDelayIncrement,
+                                            options: UIViewAnimationOptions.beginFromCurrentState,
+                                            animations: { view.frame = self.cardFrameAfterBeingMatched },
+                                            completion: { finished in
+                                                UIViewPropertyAnimator.runningPropertyAnimator(
+                                                    withDuration: 0.6,
+                                                    delay: 0.6,
+                                                    options: UIViewAnimationOptions.beginFromCurrentState,
+                                                    animations: { view.alpha = 0 }
+                                                )
+                                        }
+                                        )
+                    }
+                    )
+            }
+            )
+            matchingReturnDelayIncrement += 0.5
+        }
+        
+        // for clean up after animations
         animationCounterMultiplier = 1.0
-        dealCardsAnimationDelayIncrement = 0
-        cardTransparencyDelayIncrement = 0
         cardDealingAnimationDelays.removeAll()
+        recentlyReplacedMatchedIndices.removeAll()
+        recentlyReplacedMatchedCardViews.removeAll()
+        matchingReturnDelayIncrement = 0
     }
 }
 
@@ -338,6 +398,28 @@ extension ViewController {
         return CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/3, height: 50.0)
     }
     
-    
+    private var cardFrameAfterBeingMatched: CGRect {
+        return CGRect(x: groupOfCards.bounds.minX + groupOfCards.bounds.width/3, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/3, height: 50.0)
+    }
+}
+
+extension CGFloat {
+    var arc4random: CGFloat {
+        return self * (CGFloat(arc4random_uniform(UInt32.max))/CGFloat(UInt32.max))
+    }
+}
+
+extension UIView {
+    func rotate360Degrees(duration: CFTimeInterval = 2.0, completionDelegate: AnyObject? = nil) {
+        let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
+        rotateAnimation.fromValue = 0.0
+        rotateAnimation.toValue = 4*CGFloat.pi
+        rotateAnimation.duration = duration
+        
+        if let delegate: CAAnimationDelegate = completionDelegate as! CAAnimationDelegate? {
+            rotateAnimation.delegate = delegate
+        }
+        self.layer.add(rotateAnimation, forKey: nil)
+    }
 }
 
