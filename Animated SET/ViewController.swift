@@ -137,8 +137,6 @@ class ViewController: UIViewController {
             }
         }
         updateViewFromModel()
-//        recentlyReplacedMatchedIndices.removeAll()
-        
         setCountLabel.text = "SETS: \(game.matchCounter)"
     }
     
@@ -166,14 +164,14 @@ class ViewController: UIViewController {
             game.matchCounter += 1
             
 //            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
-//            replaceMatchingCards()
+            replaceMatchingCards()
         }
         
         if selectedCardCount > 3 {
             selectedCardCount = 1
             game.selectedCards.removeAll()
             game.selectedCards.append(game.playingCards[index])
-            replaceMatchingCards()
+//            replaceMatchingCards()
         }
     }
     
@@ -230,6 +228,7 @@ class ViewController: UIViewController {
                     game.sourceDeck.removeFirst()
                     recentlyReplacedMatchedIndices.append(indexOfMatchedCardInPlayingCards)
                 } else {
+                    recentlyReplacedMatchedCardViews.append(groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards])
                     game.playingCards.remove(at: indexOfMatchedCardInPlayingCards)
                     groupOfPlayingCardViews.remove(at: indexOfMatchedCardInPlayingCards)
                 }
@@ -269,7 +268,7 @@ class ViewController: UIViewController {
             UIViewPropertyAnimator.runningPropertyAnimator(
                 withDuration: 0.3,
                 delay: 0.1,
-                options: UIViewAnimationOptions.beginFromCurrentState,
+                options: UIViewAnimationOptions.transitionCrossDissolve,
                 animations: { specificCard.alpha = 1 }
             )
             
@@ -305,62 +304,42 @@ class ViewController: UIViewController {
                 specificCard.layer.borderWidth = DesignConstants.faceUpCardBorderWidth
             }
             
-            if game.matchedCards.contains(game.playingCards[index]) {
-                let copyOfMatchedCard = playingCardView()
-                copyOfMatchedCard.rotate360Degrees()
-                copyOfMatchedCard.number = game.playingCards[index].number.rawValue
-                let copyOfMatchedCardDesigns = [copyOfMatchedCard.cardDesign, copyOfMatchedCard.cardDesignCopy, copyOfMatchedCard.cardDesignCopy2]
-                for designCopies in copyOfMatchedCardDesigns {
-                    designCopies.color = game.playingCards[index].color.rawValue
-                    designCopies.symbol = game.playingCards[index].symbol.rawValue
-                    designCopies.shading = game.playingCards[index].shading.rawValue
-                }
-                copyOfMatchedCard.isFaceUp = !copyOfMatchedCard.isFaceUp
-                copyOfMatchedCard.backgroundColor = DesignConstants.faceUpCardBackgroundColor
-                copyOfMatchedCard.layer.borderColor = DesignConstants.faceUpCardBorderColor
-                copyOfMatchedCard.layer.borderWidth = DesignConstants.faceUpCardBorderWidth
-                copyOfMatchedCard.frame = specificCard.frame
-            
-                recentlyReplacedMatchedCardViews.append(copyOfMatchedCard)
-                
-                UIViewPropertyAnimator.runningPropertyAnimator(
-                    withDuration: 0.1,
-                    delay: 0.0,
-                    options: UIViewAnimationOptions.curveEaseInOut,
-                    animations: { specificCard.alpha = 0 },
-                    completion: { finsihed in }
-                )
-            }
-            
             let tap = UITapGestureRecognizer(target: self, action: #selector(selectCard(_:)))
             specificCard.addGestureRecognizer(tap)
         }
+        
         for view in recentlyReplacedMatchedCardViews {
             groupOfCards.addSubview(view)
             cardBehavior.addItem(view)
+            view.rotate360Degrees()
             view.layer.zPosition = 1
+            
+            for subview in view.subviews {
+                subview.autoresizingMask = [.flexibleTopMargin,.flexibleBottomMargin,.flexibleLeftMargin,.flexibleRightMargin]
+            }
+            
             UIViewPropertyAnimator.runningPropertyAnimator(
                 withDuration: 0.2,
-                delay: 0.5,
-                options: UIViewAnimationOptions.beginFromCurrentState,
+                delay: 1.0,
+                options: UIViewAnimationOptions.transitionCrossDissolve,
                 animations: { view.backgroundColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1) },
                 completion: { finished in
                     UIView.transition(with: view,
-                                      duration: 0.6,
-                                      options: .transitionFlipFromRight,
-                                      animations: { view.isFaceUp = !view.isFaceUp },
+                                      duration: 1.0,
+                                      options: UIViewAnimationOptions.transitionCrossDissolve,
+                                      animations: { view.layer.borderColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0) },
                                       completion: { finished in
                                         self.cardBehavior.removeItem(view)
                                         UIViewPropertyAnimator.runningPropertyAnimator(
-                                            withDuration: 1.0,
+                                            withDuration: 1.5,
                                             delay: self.matchingReturnDelayIncrement,
-                                            options: UIViewAnimationOptions.beginFromCurrentState,
+                                            options: UIViewAnimationOptions.curveEaseInOut,
                                             animations: { view.frame = self.cardFrameAfterBeingMatched },
                                             completion: { finished in
                                                 UIViewPropertyAnimator.runningPropertyAnimator(
                                                     withDuration: 0.6,
                                                     delay: 0.6,
-                                                    options: UIViewAnimationOptions.beginFromCurrentState,
+                                                    options: UIViewAnimationOptions.transitionCrossDissolve,
                                                     animations: { view.alpha = 0 }
                                                 )
                                         }
