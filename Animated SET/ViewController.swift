@@ -15,10 +15,7 @@ class ViewController: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
-//        for index in game.playingCards.indices {
-//            cardDealingAnimationDelays.append(0)
-//        }
-//        updateViewFromModel()
+        updateGridLayoutWhenRotatingDevice()
     }
     
     lazy var game = SetGame()
@@ -54,7 +51,6 @@ class ViewController: UIViewController {
                 groupOfPlayingCardViews.append(playingCardView())
                 groupOfPlayingCardViews[index].frame = cardFrameBeforeBeingAdded
                 groupOfPlayingCardViews[index].backgroundColor = DesignConstants.faceDownCardBackgroundColor
-//                groupOfPlayingCardViews[index].alpha = 0
             }
             cardDealingAnimationDelays.append(0)
             if index > 0 {
@@ -82,9 +78,9 @@ class ViewController: UIViewController {
             swipeDown.direction = .down
             groupOfCards.addGestureRecognizer(swipeDown)
             
-//            let rotate = UIRotationGestureRecognizer(target: self, action: #selector(shuffleCard(_:)))
-//            rotate.rotation = CGFloat.pi
-//            groupOfCards.addGestureRecognizer(rotate)
+            let rotate = UIRotationGestureRecognizer(target: self, action: #selector(shuffleCard(_:)))
+            rotate.rotation = CGFloat.pi
+            groupOfCards.addGestureRecognizer(rotate)
         }
     }
     
@@ -134,11 +130,13 @@ class ViewController: UIViewController {
             }
         }
         updateViewFromModel()
-        setCountLabel.text = "SETS: \(game.matchCounter)"
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { timer in
+        self.setCountLabel.text = "SETS: \(self.game.matchCounter)"
+        }
     }
     
     var selectedCardCount = 0
-//    var arrayOfCurrentSelectedCardIndices = [Int]()
 
     func cardSelectionLogic(at index: Int) {
         selectedCardCount += 1
@@ -155,12 +153,12 @@ class ViewController: UIViewController {
         }
         
         if selectedCardCount == 3 {
-//            for card in game.selectedCards {
-//                game.matchedCards.append(card)
-//            }
-//            game.matchCounter += 1
+            for card in game.selectedCards {
+                game.matchedCards.append(card)
+            }
+            game.matchCounter += 1
 //
-            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
+//            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
             replaceMatchingCards()
         }
         
@@ -168,20 +166,26 @@ class ViewController: UIViewController {
             selectedCardCount = 1
             game.selectedCards.removeAll()
             game.selectedCards.append(game.playingCards[index])
-//            replaceMatchingCards()
         }
     }
     
-//    @objc func shuffleCard(_ sender: UIRotationGestureRecognizer) {
-//        switch sender.state {
-//        case .ended:
-//            game.shufflePlayingCards()
-//            for index in game.playingCards.indices {
-//                updateViewFromModel(for: index)
-//            }
-//        default: break
-//        }
-//    }
+    @objc func shuffleCard(_ sender: UIRotationGestureRecognizer) {
+        switch sender.state {
+        case .ended:
+            game.shufflePlayingCards()
+            groupOfPlayingCardViews.removeAll()
+            
+            for index in game.playingCards.indices {
+                groupOfPlayingCardViews.append(playingCardView())
+                groupOfPlayingCardViews[index].frame = cardFrameBeforeBeingShuffled
+                groupOfPlayingCardViews[index].backgroundColor = DesignConstants.faceDownCardBackgroundColor
+                cardDealingAnimationDelays.append(0)
+            }
+            
+            updateViewFromModel()
+        default: break
+        }
+    }
     
     @IBAction func dealMore(_ sender: UIButton) {
         swipeDownForMoreCards()
@@ -191,7 +195,6 @@ class ViewController: UIViewController {
         resetCardView()
         generateInitialDeck()
         selectedCardCount = 0
-        // need to add other delay increments
         
         setCountLabel.text = "SETS: \(game.matchCounter)"
     }
@@ -221,7 +224,6 @@ class ViewController: UIViewController {
                     groupOfPlayingCardViews.insert(playingCardView(), at: indexOfMatchedCardInPlayingCards)
                     groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards].frame = cardFrameBeforeBeingAdded
                     groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards].backgroundColor = DesignConstants.faceDownCardBackgroundColor
-//                    groupOfPlayingCardViews[indexOfMatchedCardInPlayingCards].alpha = 0
                     game.sourceDeck.removeFirst()
                     recentlyReplacedMatchedIndices.append(indexOfMatchedCardInPlayingCards)
                 } else {
@@ -261,6 +263,7 @@ class ViewController: UIViewController {
                 designCopies.color = game.playingCards[index].color.rawValue
                 designCopies.symbol = game.playingCards[index].symbol.rawValue
                 designCopies.shading = game.playingCards[index].shading.rawValue
+                designCopies.autoresizingMask = [.flexibleTopMargin,.flexibleBottomMargin,.flexibleLeftMargin,.flexibleRightMargin]
             }
             
             if let cardGridCell = playingCardView.gridOfCards[index] {
@@ -274,8 +277,6 @@ class ViewController: UIViewController {
                     completion: { finished in
                         if !specificCard.isFaceUp {
                             specificCard.backgroundColor = DesignConstants.faceUpCardBackgroundColor
-                            specificCard.layer.borderColor = DesignConstants.faceUpCardBorderColor
-                            specificCard.layer.borderWidth = DesignConstants.faceUpCardBorderWidth
                             
                             UIView.transition(with: specificCard,
                                               duration: 1.0,
@@ -286,6 +287,9 @@ class ViewController: UIViewController {
                 }
                 )
             }
+            
+            specificCard.layer.borderColor = DesignConstants.faceUpCardBorderColor
+            specificCard.layer.borderWidth = DesignConstants.faceUpCardBorderWidth
             
             if game.selectedCards.contains(game.playingCards[index]) {
                 specificCard.layer.borderColor = DesignConstants.selectedCardBorderColor
@@ -305,12 +309,12 @@ class ViewController: UIViewController {
             view.rotate360Degrees()
             view.layer.zPosition = 1
             
-            view.backgroundColor = #colorLiteral(red: 0.2094707265, green: 0.5963771548, blue: 0.9175742126, alpha: 1)
-            view.layer.borderColor = #colorLiteral(red: 0.1019607857, green: 0.2784313858, blue: 0.400000006, alpha: 1)
-            view.layer.borderWidth = 2.0
+            view.backgroundColor = DesignConstants.faceUpCardBackgroundColor
+            view.layer.borderColor = DesignConstants.matchingCardBorderColor
+            view.layer.borderWidth = DesignConstants.matchingCardBorderWidth
             
             for subview in view.subviews {
-                subview.autoresizingMask = [.flexibleTopMargin,.flexibleBottomMargin,.flexibleLeftMargin,.flexibleRightMargin,.flexibleWidth,.flexibleHeight]
+                subview.autoresizingMask = [.flexibleTopMargin,.flexibleBottomMargin,.flexibleLeftMargin,.flexibleRightMargin]
             }
             
             timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { timer in
@@ -321,94 +325,25 @@ class ViewController: UIViewController {
                     options: [.curveEaseInOut, .beginFromCurrentState],
                     animations: { view.frame = self.cardFrameAfterBeingMatched },
                     completion: { finished in
-                        UIViewPropertyAnimator.runningPropertyAnimator(
-                            withDuration: 0.6,
-                            delay: 0.6,
-                            options: UIViewAnimationOptions.transitionCrossDissolve,
-                            animations: { view.alpha = 0 }
+                        for subview in view.subviews {
+                            subview.removeFromSuperview()
+                        }
+                        UIView.transition(with: view,
+                                          duration: 1.0,
+                                          options: UIViewAnimationOptions.transitionFlipFromTop,
+                                          animations: {view.isFaceUp = !view.isFaceUp},
+                                          completion: {finished in
+                                            UIViewPropertyAnimator.runningPropertyAnimator(
+                                                withDuration: 0.6,
+                                                delay: 0.6,
+                                                options: UIViewAnimationOptions.transitionCrossDissolve,
+                                                animations: { view.alpha = 0 }
+                                            )
+                        }
                         )
                 }
                 )
-//                    UIView.transition(with: view,
-//                                      duration: 1.0,
-//                                      options: .transitionCrossDissolve,
-//                                      animations: { view.isFaceUp = !view.isFaceUp },
-//                                      completion: {finished in
-//                                        UIViewPropertyAnimator.runningPropertyAnimator(
-//                                            withDuration: 1.5,
-//                                            delay: self.matchingReturnDelayIncrement,
-//                                            options: [.curveEaseInOut, .beginFromCurrentState],
-//                                            animations: { view.frame = self.cardFrameAfterBeingMatched },
-//                                            completion: { finished in
-//                                                UIViewPropertyAnimator.runningPropertyAnimator(
-//                                                    withDuration: 0.6,
-//                                                    delay: 0.6,
-//                                                    options: UIViewAnimationOptions.transitionCrossDissolve,
-//                                                    animations: { view.alpha = 0 }
-//                                                )
-//                                        }
-//                                        )
-//                    }
-//                    )
-                }
-            
-
-//            UIView.transition(with: view,
-//                              duration: 1.0,
-//                              options: .transitionCrossDissolve,
-//                              animations: { view.isFaceUp = !view.isFaceUp },
-//                              completion: {finished in
-//                                self.cardBehavior.removeItem(view)
-//                                UIViewPropertyAnimator.runningPropertyAnimator(
-//                                    withDuration: 1.5,
-//                                    delay: self.matchingReturnDelayIncrement,
-//                                    options: [.curveEaseInOut, .beginFromCurrentState],
-//                                    animations: { view.frame = self.cardFrameAfterBeingMatched },
-//                                    completion: { finished in
-//                                        UIViewPropertyAnimator.runningPropertyAnimator(
-//                                            withDuration: 0.6,
-//                                            delay: 0.6,
-//                                            options: UIViewAnimationOptions.transitionCrossDissolve,
-//                                            animations: { view.alpha = 0 }
-//                                        )
-//                                }
-//                                )
-//            }
-//            )
-            
-            
-            
-//            
-//            UIViewPropertyAnimator.runningPropertyAnimator(
-//                withDuration: 0.6,
-//                delay: 5.0,
-//                options: UIViewAnimationOptions.transitionCrossDissolve,
-//                animations: { view.backgroundColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1) },
-//                completion: { finished in
-//                    UIViewPropertyAnimator.runningPropertyAnimator(withDuration: 0.6,
-//                                                                   delay: 1.0,
-//                                                                   options: UIViewAnimationOptions.transitionCrossDissolve,
-//                                                                   animations: { view.layer.borderColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0) },
-//                                                                   completion: {finished in
-//                                                                    self.cardBehavior.removeItem(view)
-//                                                                    UIViewPropertyAnimator.runningPropertyAnimator(
-//                                                                        withDuration: 1.5,
-//                                                                        delay: self.matchingReturnDelayIncrement,
-//                                                                        options: [.curveEaseInOut, .beginFromCurrentState],
-//                                                                        animations: { view.frame = self.cardFrameAfterBeingMatched },
-//                                                                        completion: { finished in
-//                                                                            UIViewPropertyAnimator.runningPropertyAnimator(
-//                                                                                withDuration: 0.6,
-//                                                                                delay: 0.6,
-//                                                                                options: UIViewAnimationOptions.transitionCrossDissolve,
-//                                                                                animations: { view.alpha = 0 }
-//                                                                            )
-//                                                                    }
-//                                                                    )
-//                    }
-//                    )
-//            }
-//            )
+            }
             matchingReturnDelayIncrement += 0.5
         }
         
@@ -418,6 +353,17 @@ class ViewController: UIViewController {
         recentlyReplacedMatchedIndices.removeAll()
         recentlyReplacedMatchedCardViews.removeAll()
         matchingReturnDelayIncrement = 0
+    }
+    
+    func updateGridLayoutWhenRotatingDevice() {
+        playingCardView.gridOfCards.frame = groupOfCards.bounds
+        playingCardView.gridOfCards.cellCount = game.playingCards.count
+        for index in groupOfPlayingCardViews.indices {
+            if let cardGridCell = playingCardView.gridOfCards[index] {
+                let cardFrame = cardGridCell.insetBy(dx: 1.0, dy: 1.0)
+                groupOfPlayingCardViews[index].frame = cardFrame
+            }
+        }
     }
 }
 
@@ -432,10 +378,17 @@ extension ViewController {
         static let selectedCardBorderColor: CGColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
         static let selectedCardBorderWidth: CGFloat = 2.0
         
+        static let matchingCardBorderColor: CGColor = #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1)
+        static let matchingCardBorderWidth: CGFloat = 2.0
+        
     }
     
     private var cardFrameBeforeBeingAdded: CGRect {
         return CGRect(x: groupOfCards.bounds.minX, y: groupOfCards.bounds.maxY, width: groupOfCards.bounds.width/3, height: 50.0)
+    }
+    
+    private var cardFrameBeforeBeingShuffled: CGRect {
+        return CGRect(x: groupOfCards.bounds.minX + groupOfCards.bounds.width/3, y: groupOfCards.bounds.midY, width: groupOfCards.bounds.width/3, height: 50.0)
     }
     
     private var cardFrameAfterBeingMatched: CGRect {
