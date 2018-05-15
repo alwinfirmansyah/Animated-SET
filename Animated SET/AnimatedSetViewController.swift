@@ -23,13 +23,6 @@ class AnimatedSetViewController: UIViewController {
     lazy var animator = UIDynamicAnimator(referenceView: groupOfCards)
     lazy var cardBehavior = CardBehavior(in: animator)
     
-    lazy var collisionBehavior: UICollisionBehavior = {
-        let behavior = UICollisionBehavior()
-        behavior.translatesReferenceBoundsIntoBoundary = true
-        animator.addBehavior(behavior)
-        return behavior
-    }()
-    
     func generateInitialDeck() {
         game.fullSourceDeck = CardDeck()
         
@@ -93,7 +86,6 @@ class AnimatedSetViewController: UIViewController {
                 groupOfPlayingCardViews.append(playingCardView())
                 groupOfPlayingCardViews.last?.frame = cardFrameBeforeBeingAdded
                 groupOfPlayingCardViews.last?.backgroundColor = DesignConstants.faceDownCardBackgroundColor
-//                groupOfPlayingCardViews.last?.alpha = 0
                 if let shuffledDeckIndex = game.sourceDeck.index(of: newCards[index]){
                     game.sourceDeck.remove(at: shuffledDeckIndex)
                 }
@@ -308,15 +300,15 @@ class AnimatedSetViewController: UIViewController {
             cardBehavior.addItem(view)
             view.rotate360Degrees()
             view.layer.zPosition = 1
-            
+
             view.backgroundColor = DesignConstants.faceUpCardBackgroundColor
             view.layer.borderColor = DesignConstants.matchingCardBorderColor
             view.layer.borderWidth = DesignConstants.matchingCardBorderWidth
-            
+
             for subview in view.subviews {
                 subview.autoresizingMask = [.flexibleTopMargin,.flexibleBottomMargin,.flexibleLeftMargin,.flexibleRightMargin]
             }
-            
+
             timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { timer in
                 self.cardBehavior.removeItem(view)
                 UIViewPropertyAnimator.runningPropertyAnimator(
