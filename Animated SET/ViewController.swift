@@ -153,12 +153,12 @@ class ViewController: UIViewController {
         }
         
         if selectedCardCount == 3 {
-            for card in game.selectedCards {
-                game.matchedCards.append(card)
-            }
-            game.matchCounter += 1
+//            for card in game.selectedCards {
+//                game.matchedCards.append(card)
+//            }
+//            game.matchCounter += 1
 //
-//            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
+            game.matchingSetLogic(for: game.selectedCards[0], for: game.selectedCards[1], for: game.selectedCards[2])
             replaceMatchingCards()
         }
         
