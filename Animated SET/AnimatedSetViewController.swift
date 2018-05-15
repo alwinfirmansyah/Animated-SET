@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class AnimatedSetViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -367,7 +367,7 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController {
+extension AnimatedSetViewController {
     private struct DesignConstants {
         static let faceDownCardBackgroundColor: UIColor = #colorLiteral(red: 0.911333541, green: 0.911333541, blue: 0.911333541, alpha: 1)
         static let faceUpCardBackgroundColor: UIColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
