@@ -78,14 +78,7 @@
 		1C0D33EB20A22D8500D0FE6A /* Animated SET */ = {
 			isa = PBXGroup;
 			children = (
-				1C0D33EE20A22D8500D0FE6A /* AnimatedSetViewController.swift */,
-				1C2671F120A6896C006F0B43 /* CardBehavior.swift */,
-				1C0D340920A22E7800D0FE6A /* playingCardView.swift */,
-				1C0D340B20A22E9F00D0FE6A /* cardDesignView.swift */,
-				1C0D33FF20A22DC000D0FE6A /* Card.swift */,
-				1C0D340520A22E1400D0FE6A /* CardDeck.swift */,
-				1C2CAA8E20AA9E2500B37D33 /* Grid.swift */,
-				1C0D340720A22E2900D0FE6A /* SetGame.swift */,
+				1C312E0120ACBA0000A1F185 /* Set */,
 				1C7B2F1920AB6CD30048BF96 /* Concentration */,
 				1C0D33F020A22D8500D0FE6A /* Main.storyboard */,
 				1C0D33FE20A22D9A00D0FE6A /* Supporting Files */,
@@ -103,6 +96,21 @@
 				1C0D33F520A22D8700D0FE6A /* LaunchScreen.storyboard */,
 			);
 			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1C312E0120ACBA0000A1F185 /* Set */ = {
+			isa = PBXGroup;
+			children = (
+				1C0D33EE20A22D8500D0FE6A /* AnimatedSetViewController.swift */,
+				1C2671F120A6896C006F0B43 /* CardBehavior.swift */,
+				1C0D340920A22E7800D0FE6A /* playingCardView.swift */,
+				1C0D340B20A22E9F00D0FE6A /* cardDesignView.swift */,
+				1C0D33FF20A22DC000D0FE6A /* Card.swift */,
+				1C0D340520A22E1400D0FE6A /* CardDeck.swift */,
+				1C2CAA8E20AA9E2500B37D33 /* Grid.swift */,
+				1C0D340720A22E2900D0FE6A /* SetGame.swift */,
+			);
+			path = Set;
 			sourceTree = "<group>";
 		};
 		1C7B2F1920AB6CD30048BF96 /* Concentration */ = {
