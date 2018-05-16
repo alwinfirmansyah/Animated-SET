@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AnimatedSetViewController: UIViewController {
+class AnimatedSetViewController: VCLLoggingViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
